@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form_Main));
             this.listView_FileList = new System.Windows.Forms.ListView();
             this.ch_Path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ch_Filename = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -465,6 +466,7 @@
             this.Controls.Add(this.button_RemovefromList);
             this.Controls.Add(this.button_ResetList);
             this.Controls.Add(this.listView_FileList);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form_Main";
             this.Text = "Rename My Ass";
             this.ResumeLayout(false);
