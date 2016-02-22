@@ -31,8 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form_Main));
             this.listView_FileList = new System.Windows.Forms.ListView();
             this.ch_Path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.ch_Filename = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.ch_NewFilename = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ch_Before = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ch_After = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ch_Result = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.button_ResetList = new System.Windows.Forms.Button();
             this.button_RemovefromList = new System.Windows.Forms.Button();
@@ -78,8 +78,8 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_FileList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.ch_Path,
-            this.ch_Filename,
-            this.ch_NewFilename,
+            this.ch_Before,
+            this.ch_After,
             this.ch_Result});
             this.listView_FileList.FullRowSelect = true;
             this.listView_FileList.GridLines = true;
@@ -101,17 +101,17 @@
             this.ch_Path.Text = "Path";
             this.ch_Path.Width = 217;
             // 
-            // ch_Filename
+            // ch_Before
             // 
-            this.ch_Filename.Text = "Filename";
-            this.ch_Filename.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.ch_Filename.Width = 179;
+            this.ch_Before.Text = "Before";
+            this.ch_Before.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.ch_Before.Width = 179;
             // 
-            // ch_NewFilename
+            // ch_After
             // 
-            this.ch_NewFilename.Text = "NewFilename";
-            this.ch_NewFilename.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.ch_NewFilename.Width = 220;
+            this.ch_After.Text = "After";
+            this.ch_After.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.ch_After.Width = 220;
             // 
             // ch_Result
             // 
@@ -296,6 +296,7 @@
             this.comboBox_Target.Name = "comboBox_Target";
             this.comboBox_Target.Size = new System.Drawing.Size(173, 20);
             this.comboBox_Target.TabIndex = 14;
+            this.comboBox_Target.SelectedIndexChanged += new System.EventHandler(this.comboBox_Target_SelectedIndexChanged);
             // 
             // comboBox_Mode
             // 
@@ -478,8 +479,8 @@
 
         private System.Windows.Forms.ListView listView_FileList;
         private System.Windows.Forms.ColumnHeader ch_Path;
-        private System.Windows.Forms.ColumnHeader ch_Filename;
-        private System.Windows.Forms.ColumnHeader ch_NewFilename;
+        private System.Windows.Forms.ColumnHeader ch_Before;
+        private System.Windows.Forms.ColumnHeader ch_After;
         private System.Windows.Forms.ColumnHeader ch_Result;
         private System.Windows.Forms.Button button_ResetList;
         private System.Windows.Forms.Button button_RemovefromList;

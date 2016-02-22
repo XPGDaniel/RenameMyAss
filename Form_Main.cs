@@ -10,12 +10,18 @@ using System.Text;
 using System.Windows.Forms;
 using RenameMyAss.Class;
 using System.Collections.Specialized;
+using System.Diagnostics;
 
 namespace RenameMyAss
 {
     public partial class Form_Main : Form
     {
         private XMLHelper xmlH = new XMLHelper();
+        const int ALT = 32;
+        const int CTRL = 8;
+        const int SHIFT = 4;
+        const string WinRAR = @"C:\Program Files\WinRAR\WinRAR.exe";
+        public bool MakeRAR = false;
         public Form_Main()
         {
             InitializeComponent();
@@ -30,12 +36,47 @@ namespace RenameMyAss
             button_Preview.Enabled = false;
             button_Rename.Enabled = false;
             AuxParameters_Control(false);
+            if(File.Exists(WinRAR)) comboBox_Target.Items.Add("FolderName");
         }
-        const int ALT = 32;
-        const int CTRL = 8;
-        const int SHIFT = 4;
         private enum MoveDirection { Up = -1, Down = 1 };
         #region ComboBoxes
+        private void comboBox_Target_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            comboBox_Mode.Items.Clear();
+            AuxParameters_Control(false);
+            label_Parameter2.Text = "Parameter2";
+            switch (comboBox_Target.Text.ToLowerInvariant())
+            {
+                case "filename":
+                case " fileextension":
+                case "foldername":
+                    comboBox_Mode.Items.Add("Prefix");
+                    comboBox_Mode.Items.Add("Suffix");
+                    comboBox_Mode.Items.Add("Remove");
+                    comboBox_Mode.Items.Add("Replace");
+                    comboBox_Mode.Items.Add("UPPERCASE");
+                    comboBox_Mode.Items.Add("lowercase");
+                    comboBox_Mode.Items.Add("Insert");
+                    if (comboBox_Target.Text.ToLowerInvariant() == "foldername") comboBox_Mode.Items.Add("MakeRAR");
+                    comboBox_Mode.Visible = true;
+                    label_Mode.Visible = true;
+                    comboBox_Parameter1.Visible = true;
+                    label_Parameter1.Visible = true;
+                    comboBox_Parameter2.Visible = true;
+                    label_Parameter2.Visible = true;
+                    break;
+                //case "rarfolder":
+                //    comboBox_Mode.Text = "";
+                //    comboBox_Mode.Visible = false;
+                //    label_Mode.Visible = false;
+                //    comboBox_Parameter1.Visible = false;
+                //    label_Parameter1.Visible = false;
+                //    comboBox_Parameter2.Visible = false;
+                //    label_Parameter2.Visible = false;
+                //    break;
+            }
+        }
+
         private void comboBox_Mode_SelectedIndexChanged(object sender, EventArgs e)
         {
             comboBox_Parameter1.Items.Clear();
@@ -82,6 +123,11 @@ namespace RenameMyAss
                     comboBox_Parameter2_Controls(false, null);
                     comboBox_Parameter1.Items.Add("Phase");
                     comboBox_Parameter1.Items.Add("Digit");
+                    break;
+                case "makerar":
+                    label_Parameter1.Text = "Parameter1";
+                    comboBox_Parameter1.Text = "";
+                    comboBox_Parameter2_Controls(false, null);
                     break;
                 //default:
                 //comboBox_Parameter1.Items.Clear();
@@ -223,7 +269,7 @@ namespace RenameMyAss
                                         newFilenameList = RuleHandler.RemoveFileExtension(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
                                     case "replace":
-                                        newFilenameList = RuleHandler.ReplaceFileExtension(newFilenameList, rule.SubItems[2].Text);
+                                        newFilenameList = RuleHandler.ReplaceFileExtension(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
                                     case "prefix":
                                         newFilenameList = RuleHandler.PrefixFileExtension(newFilenameList, rule.SubItems[2].Text);
@@ -239,6 +285,35 @@ namespace RenameMyAss
                                         break;
                                     case "insert":
                                         newFilenameList = RuleHandler.InsertIntoFileExtension(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text, rule.SubItems[4].Text);
+                                        break;
+                                }
+                                break;
+                            case "foldername":
+                                switch (rule.SubItems[1].Text.ToLowerInvariant())
+                                {
+                                    case "remove":
+                                        newFilenameList = RuleHandler.RemoveFolderName(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text);
+                                        break;
+                                    case "replace":
+                                        newFilenameList = RuleHandler.ReplaceFolderName(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text);
+                                        break;
+                                    case "prefix":
+                                        newFilenameList = RuleHandler.PrefixFolderName(newFilenameList, rule.SubItems[2].Text);
+                                        break;
+                                    case "suffix":
+                                        newFilenameList = RuleHandler.SuffixFolderName(newFilenameList, rule.SubItems[2].Text);
+                                        break;
+                                    case "uppercase":
+                                        newFilenameList = RuleHandler.ChangeFolderNameCase(newFilenameList, "up", rule.SubItems[2].Text, rule.SubItems[3].Text);
+                                        break;
+                                    case "lowercase":
+                                        newFilenameList = RuleHandler.ChangeFolderNameCase(newFilenameList, "down", rule.SubItems[2].Text, rule.SubItems[3].Text);
+                                        break;
+                                    case "insert":
+                                        newFilenameList = RuleHandler.InsertIntoFolderName(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text, rule.SubItems[4].Text);
+                                        break;
+                                    case "makerar":
+                                        MakeRAR = true;
                                         break;
                                 }
                                 break;
@@ -269,40 +344,97 @@ namespace RenameMyAss
                 }
                 if (RenameList.Any())
                 {
-                    foreach (FileToRename fileCandidate in RenameList)
+
+                    switch (comboBox_Target.Text.ToLowerInvariant())
                     {
-                        if (File.Exists(fileCandidate.Path))
-                        {
-                            try
+                        case "foldername":
+                            foreach (FileToRename fileCandidate in RenameList)
                             {
-                                FileInfo fi = new FileInfo(fileCandidate.Path);
-                                if (!string.IsNullOrEmpty(Path.GetFileNameWithoutExtension(fileCandidate.NewFileName)) && !string.IsNullOrEmpty(Path.GetExtension(fileCandidate.NewFileName)))
+                                if (Directory.Exists(fileCandidate.Path))
                                 {
-                                    File.Move(fi.FullName, fi.FullName.Replace(fileCandidate.FileName, fileCandidate.NewFileName));
-                                    fileCandidate.Result = "Rename OK";
-                                }
-                                else
-                                {
-                                    fileCandidate.Result = "Invalid new Filename or Extension";
+                                    try
+                                    {
+                                        if (!string.IsNullOrEmpty(Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName))
+                                        {
+                                            if (fileCandidate.Path != Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName)
+                                            {
+                                                Directory.Move(fileCandidate.Path, Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName);
+                                                fileCandidate.Result = "Rename OK";
+                                            }
+                                            if (MakeRAR)
+                                            {//"C:\Program Files\WinRAR\WinRAR.exe" a -ep "C:\Users\Hüseyin\Desktop\deneme.rar" "C:\Users\Hüseyin\Desktop\AA\"
+                                                using (Process p = new Process())
+                                                {
+                                                    p.StartInfo.FileName = "cmd.exe";
+                                                    p.StartInfo.FileName = WinRAR;
+                                                    p.StartInfo.RedirectStandardOutput = true;
+                                                    p.StartInfo.RedirectStandardError = true;
+                                                    p.StartInfo.UseShellExecute = false;
+                                                    p.StartInfo.CreateNoWindow = false; //Default:true
+                                                    //p.StartInfo.Arguments = "/c \"\"" + WinRAR + "\" a -ep1 -r \"" + Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName + ".rar\" \"" + Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName + "\\*\" -rr3p\"";
+                                                    p.StartInfo.Arguments = " a -ep1 -r \"" + Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName + ".rar\" \"" + Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName + "\\*\" -rr3p";
+                                                    p.Start();
+                                                    //string stdoutx = p.StandardOutput.ReadToEnd();
+                                                    //string stderrx = p.StandardError.ReadToEnd();
+                                                    p.WaitForExit();
+                                                    //Console.WriteLine("Exit code : {0}", p.ExitCode);
+                                                    //Console.WriteLine("Stdout : {0}", stdoutx);
+                                                    //Console.WriteLine("Stderr : {0}", stderrx);
+                                                    fileCandidate.Result += "RAR OK";
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            fileCandidate.Result = "Invalid new FolderName";
+                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+                                        fileCandidate.Result = "Rename Fail";
+                                        //throw;
+                                    }
                                 }
                             }
-                            catch (Exception)
+                            break;
+                        default:
+                            foreach (FileToRename fileCandidate in RenameList)
                             {
-                                fileCandidate.Result = "Rename Fail";
-                                //throw;
+                                if (File.Exists(fileCandidate.Path))
+                                {
+                                    try
+                                    {
+                                        FileInfo fi = new FileInfo(fileCandidate.Path);
+                                        if (!string.IsNullOrEmpty(Path.GetFileNameWithoutExtension(fileCandidate.NewFileName)) && !string.IsNullOrEmpty(Path.GetExtension(fileCandidate.NewFileName)))
+                                        {
+                                            File.Move(fi.FullName, fi.FullName.Replace(fileCandidate.FileName, fileCandidate.NewFileName));
+                                            fileCandidate.Result = "Rename OK";
+                                        }
+                                        else
+                                        {
+                                            fileCandidate.Result = "Invalid new Filename or Extension";
+                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+                                        fileCandidate.Result = "Rename Fail";
+                                        //throw;
+                                    }
+                                }
                             }
-                        }
+                            break;
                     }
-                    for (int i = 0; i < RenameList.Count; i++)
-                    {
-                        ListViewItem fooItem = listView_FileList.Items.Find(RenameList[i].Path, false)[0];
-                        fooItem.SubItems[3].Text = RenameList[i].Result;
-                    }
+                }
+                for (int i = 0; i < RenameList.Count; i++)
+                {
+                    ListViewItem fooItem = listView_FileList.Items.Find(RenameList[i].Path, false)[0];
+                    fooItem.SubItems[3].Text = RenameList[i].Result;
                 }
                 RenameList.Clear();
                 button_Undo.Enabled = true;
             }
-
+            MessageBox.Show("Done!");
+            MakeRAR = false;
         }
         private void button_Undo_Click(object sender, EventArgs e)
         {
@@ -320,23 +452,48 @@ namespace RenameMyAss
                 }
                 if (UndoList.Any())
                 {
-                    foreach (FileToRename fileCandidate in UndoList)
+                    switch (comboBox_Target.Text.ToLowerInvariant())
                     {
-                        string CurrentNewFileName = fileCandidate.Path.Replace(fileCandidate.FileName, fileCandidate.NewFileName);
-                        if (File.Exists(CurrentNewFileName))
-                        {
-                            try
+                        case "foldername":
+                            foreach (FileToRename fileCandidate in UndoList)
                             {
-                                FileInfo fi = new FileInfo(CurrentNewFileName);
-                                File.Move(fi.FullName, fi.FullName.Replace(fileCandidate.NewFileName, fileCandidate.FileName));
-                                fileCandidate.Result = "Undo OK";
+                                string CurrentNewFolderName = Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName;
+                                if (Directory.Exists(CurrentNewFolderName))
+                                {
+                                    try
+                                    {
+                                        //FileInfo fi = new FileInfo(CurrentNewFileName);
+                                        Directory.Move(CurrentNewFolderName, fileCandidate.Path);
+                                        fileCandidate.Result = "Undo OK";
+                                    }
+                                    catch (Exception)
+                                    {
+                                        fileCandidate.Result = "Undo Fail";
+                                        //throw;
+                                    }
+                                }
                             }
-                            catch (Exception)
+                            break;
+                        default:
+                            foreach (FileToRename fileCandidate in UndoList)
                             {
-                                fileCandidate.Result = "Undo Fail";
-                                //throw;
+                                string CurrentNewFileName = fileCandidate.Path.Replace(fileCandidate.FileName, fileCandidate.NewFileName);
+                                if (File.Exists(CurrentNewFileName))
+                                {
+                                    try
+                                    {
+                                        FileInfo fi = new FileInfo(CurrentNewFileName);
+                                        File.Move(fi.FullName, fi.FullName.Replace(fileCandidate.NewFileName, fileCandidate.FileName));
+                                        fileCandidate.Result = "Undo OK";
+                                    }
+                                    catch (Exception)
+                                    {
+                                        fileCandidate.Result = "Undo Fail";
+                                        //throw;
+                                    }
+                                }
                             }
-                        }
+                            break;
                     }
                     for (int i = 0; i < UndoList.Count; i++)
                     {
@@ -388,19 +545,35 @@ namespace RenameMyAss
                 if (Directory.Exists(s))
                 {
                     //Add files from folder
-                    List<string> filepaths = new List<string>();
-                    filepaths.AddRange(Directory.GetFiles(s, "*.*", SearchOption.AllDirectories));
-                    foreach (string item in filepaths)
+                    switch (comboBox_Target.Text.ToLowerInvariant())
                     {
-                        ListViewItem lvi = new ListViewItem();
-                        FileInfo fi = new FileInfo(item);
-                        lvi.Name = fi.FullName;
-                        lvi.Text = item;
-                        lvi.SubItems.Add(fi.Name);
-                        lvi.SubItems.Add("");
-                        lvi.SubItems.Add("");
-                        listView_FileList.Items.Add(lvi);
-                        listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, lvi, lvi.Index));
+                        case "foldername":
+                            ListViewItem lvid = new ListViewItem();
+                            DirectoryInfo di = new DirectoryInfo(s);
+                            lvid.Name = di.FullName;
+                            lvid.Text = s;
+                            lvid.SubItems.Add(di.Name);
+                            lvid.SubItems.Add("");
+                            lvid.SubItems.Add("");
+                            listView_FileList.Items.Add(lvid);
+                            listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, lvid, lvid.Index));
+                            break;
+                        default:
+                            List<string> filepaths = new List<string>();
+                            filepaths.AddRange(Directory.GetFiles(s, "*.*", SearchOption.AllDirectories));
+                            foreach (string item in filepaths)
+                            {
+                                ListViewItem lvi = new ListViewItem();
+                                FileInfo fi = new FileInfo(item);
+                                lvi.Name = fi.FullName;
+                                lvi.Text = item;
+                                lvi.SubItems.Add(fi.Name);
+                                lvi.SubItems.Add("");
+                                lvi.SubItems.Add("");
+                                listView_FileList.Items.Add(lvi);
+                                listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, lvi, lvi.Index));
+                            }
+                            break;
                     }
                 }
                 else
@@ -481,12 +654,22 @@ namespace RenameMyAss
 
                 // Implement the rather strange behaviour of explorer that if the disk
                 // is different, then default to a COPY operation
-                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                //if (files.Length > 0 && !files[0].ToUpper().StartsWith(homeDisk) &&
-                //    // Probably better ways to do this
-                //(e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
-                if (files.Length > 0 && (e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
-                    e.Effect = DragDropEffects.Copy;
+                switch (comboBox_Target.Text.ToLowerInvariant())
+                {
+                    case "foldername":
+                        string[] folders = (string[])e.Data.GetData(DataFormats.FileDrop);
+                        if (folders.Length > 0 && (e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
+                            e.Effect = DragDropEffects.Copy;
+                        break;
+                    default:
+                        string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                        //if (files.Length > 0 && !files[0].ToUpper().StartsWith(homeDisk) &&
+                        //    // Probably better ways to do this
+                        //(e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
+                        if (files.Length > 0 && (e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
+                            e.Effect = DragDropEffects.Copy;
+                        break;
+                }
             }
             else
                 e.Effect = DragDropEffects.None;
@@ -500,6 +683,8 @@ namespace RenameMyAss
         {
             listView_FileList.Items.Clear();
             listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            //MakeRAR = false;
+            button_RemovefromList.Enabled = false;
         }
 
         private void button_RemovefromList_Click(object sender, EventArgs e)
@@ -559,11 +744,12 @@ namespace RenameMyAss
         }
         private void button_AddRule_Click(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(comboBox_Target.Text) && !string.IsNullOrEmpty(comboBox_Mode.Text) && !string.IsNullOrEmpty(comboBox_Parameter1.Text))
+            if ((!string.IsNullOrEmpty(comboBox_Target.Text) && !string.IsNullOrEmpty(comboBox_Mode.Text) && !string.IsNullOrEmpty(comboBox_Parameter1.Text)) ||
+            (comboBox_Target.Text.ToLowerInvariant() == "foldername" && comboBox_Mode.Text.ToLowerInvariant() == "makerar"))
             {
                 ListViewItem lvi = new ListViewItem();
                 lvi.Text = comboBox_Target.SelectedItem.ToString();
-                lvi.SubItems.Add(comboBox_Mode.SelectedItem.ToString());
+                lvi.SubItems.Add(comboBox_Mode.Text);
                 if (!string.IsNullOrEmpty(comboBox_Parameter1.Text))
                 {
                     lvi.SubItems.Add(comboBox_Parameter1.Text);
@@ -697,6 +883,7 @@ namespace RenameMyAss
         {
             listView_Rules.Items.Clear();
             listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            MakeRAR = false;
         }
 
         private void button_RemoveRule_Click(object sender, EventArgs e)
@@ -707,6 +894,7 @@ namespace RenameMyAss
                 string[] files = new string[listView_Rules.SelectedItems.Count];
                 foreach (ListViewItem item in listView_Rules.SelectedItems)
                 {
+                    if (item.SubItems[1].Text.ToLowerInvariant() == "makerar") MakeRAR = false;
                     listView_Rules.Items.Remove(item);
                 }
                 if (listView_Rules.Items.Count == 0)
@@ -859,13 +1047,6 @@ namespace RenameMyAss
             }
         }
         #endregion
-
-
-
-
-
-
-
 
     }
 }

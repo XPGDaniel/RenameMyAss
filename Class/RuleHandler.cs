@@ -379,13 +379,13 @@ namespace RenameMyAss.Class
             }
             return list;
         }
-        public static List<FileToRename> ReplaceFileExtension(List<FileToRename> list, string newExtension)
+        public static List<FileToRename> ReplaceFileExtension(List<FileToRename> list, string oldExtension, string newExtension)
         {
             if (!string.IsNullOrEmpty(newExtension) && list != null)
             {
                 for (int i = 0; i < list.Count; i++)
                 {
-                    list[i].FileName = list[i].FileName.Replace(Path.GetExtension(list[i].FileName).Substring(1), newExtension);
+                    list[i].FileName = list[i].FileName.Replace(oldExtension, newExtension);
                 }
             }
             return list;
@@ -557,6 +557,303 @@ namespace RenameMyAss.Class
                             SubLeft = extension.Substring(0, Convert.ToInt32(position));
                             SubRight = extension.Substring(Convert.ToInt32(position));
                             list[i].FileName = filename + "." + SubLeft + strgen + SubRight;
+                            if ((CurrentNo + Steps).ToString().Length > Digit || (CurrentNo + Steps) < 0)
+                            {
+                                Steps = 0;
+                            }
+                            CurrentNo += Steps;
+                            break;
+                    }
+                }
+            }
+            return list;
+        }
+        #endregion
+
+        #region FolderName Handling
+        public static List<FileToRename> RemoveFolderName(List<FileToRename> list, string mode, string subparameter)
+        {
+            if (!string.IsNullOrEmpty(mode) && list != null)
+            {
+                string foldername = "";
+                for (int i = 0; i < list.Count; i++)
+                {
+                    foldername = list[i].FileName;
+                    switch (mode.ToLowerInvariant())
+                    {
+                        case "all":
+                            list[i].FileName = "";
+                            break;
+                        case "left":
+                            if (!string.IsNullOrEmpty(subparameter))
+                            {
+                                if (foldername.Length < Convert.ToInt32(subparameter))
+                                {
+                                    subparameter = Convert.ToString(foldername.Length);
+                                }
+                                list[i].FileName = foldername.Substring(0 + Convert.ToInt32(subparameter));
+                            }
+                            break;
+                        case "right":
+                            if (!string.IsNullOrEmpty(subparameter))
+                            {
+                                if (foldername.Length < Convert.ToInt32(subparameter))
+                                {
+                                    subparameter = Convert.ToString(foldername.Length);
+                                }
+                                list[i].FileName = foldername.Substring(0, foldername.Length - Convert.ToInt32(subparameter));
+                            }
+                            break;
+                        case "center":
+                            if (!string.IsNullOrEmpty(subparameter) && foldername.Length >= 3)
+                            {
+                                int center = Convert.ToInt32(Math.Ceiling((Convert.ToDouble(foldername.Length) / 2))), leftlength = 0, rightlength = 0;
+                                if (foldername.Length < (Convert.ToInt32(subparameter) * 2))
+                                {
+                                    subparameter = Convert.ToString(center);
+                                }
+                                if (center + Convert.ToInt32(subparameter) > foldername.Length)
+                                {
+                                    rightlength = foldername.Length - center;
+                                }
+                                else
+                                {
+                                    rightlength = Convert.ToInt32(subparameter);
+                                }
+                                if (center - Convert.ToInt32(subparameter) < 0)
+                                {
+                                    leftlength = 0;
+                                }
+                                else
+                                {
+                                    leftlength = Convert.ToInt32(subparameter);
+                                }
+                                list[i].FileName = foldername.Substring(0, center - leftlength - 1) + foldername.Substring(center + rightlength);
+                            }
+                            break;
+                        case "firstletter":
+                            if (foldername.Length > 1)
+                            {
+                                list[i].FileName = foldername.Substring(1);
+                            }
+                            break;
+                        case "matchphase":
+                            if (!string.IsNullOrEmpty(subparameter))
+                            {
+                                list = ReplaceFileName(list, subparameter, "");
+                            }
+                            break;
+                        case "(*)":
+                            string regex = "(\\(.*\\))"; //"(\\[.*\\])|(\".*\")|('.*')|(\\(.*\\))";
+                            list[i].FileName = Regex.Replace(foldername, regex, "");
+                            break;
+                        case "(*":
+                            int LeftBucketIndex = foldername.IndexOf('(');
+                            if (LeftBucketIndex > 0)
+                            {
+                                list[i].FileName = foldername.Substring(0, LeftBucketIndex);
+                            }
+                            break;
+                        case "*)":
+                            int RightBucketIndex = foldername.LastIndexOf(')') + 1;
+                            if (RightBucketIndex > 0)
+                            {
+                                list[i].FileName = foldername.Substring(RightBucketIndex);
+                            }
+                            break;
+                    }
+                }
+            }
+            return list;
+        }
+        public static List<FileToRename> ReplaceFolderName(List<FileToRename> list, string target, string newstring)
+        {
+            if (!string.IsNullOrEmpty(target) && list != null)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    list[i].FileName = list[i].FileName.Replace(target, newstring);
+                }
+            }
+            return list;
+        }
+        public static List<FileToRename> PrefixFolderName(List<FileToRename> list, string prefix)
+        {
+            if (!string.IsNullOrEmpty(prefix) && list != null)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    list[i].FileName = prefix + list[i].FileName;
+                }
+            }
+            return list;
+        }
+        public static List<FileToRename> SuffixFolderName(List<FileToRename> list, string suffix)
+        {
+            if (!string.IsNullOrEmpty(suffix) && list != null)
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    list[i].FileName = list[i].FileName + suffix;
+                }
+            }
+            return list;
+        }
+        public static List<FileToRename> ChangeFolderNameCase(List<FileToRename> list, string UpDown, string mode, string subparameter)
+        {
+            if (!string.IsNullOrEmpty(mode) && !string.IsNullOrEmpty(UpDown) && list != null)
+            {
+                UpDown = UpDown.ToLowerInvariant();
+                string foldername = "";
+                for (int i = 0; i < list.Count; i++)
+                {
+                    foldername = list[i].FileName;
+                    switch (mode.ToLowerInvariant())
+                    {
+                        case "all":
+                            if (UpDown == "up")
+                            {
+                                list[i].FileName = foldername.ToUpperInvariant();
+                            }
+                            else
+                            {
+                                list[i].FileName = foldername.ToLowerInvariant();
+                            }
+                            break;
+                        case "left":
+                            if (!string.IsNullOrEmpty(subparameter))
+                            {
+                                if (foldername.Length < Convert.ToInt32(subparameter))
+                                {
+                                    subparameter = Convert.ToString(foldername.Length);
+                                }
+                                string ChangedLeftSlice = "";
+                                if (UpDown == "up")
+                                {
+                                    ChangedLeftSlice = foldername.Substring(0, Convert.ToInt32(subparameter)).ToUpperInvariant();
+                                }
+                                else
+                                {
+                                    ChangedLeftSlice = foldername.Substring(0, Convert.ToInt32(subparameter)).ToLowerInvariant();
+                                }
+                                list[i].FileName = ChangedLeftSlice + foldername.Substring(Convert.ToInt32(subparameter));
+                            }
+                            break;
+                        case "right":
+                            if (!string.IsNullOrEmpty(subparameter))
+                            {
+                                if (foldername.Length < Convert.ToInt32(subparameter))
+                                {
+                                    subparameter = Convert.ToString(foldername.Length);
+                                }
+                                string ChangedRightSlice = "";
+                                if (UpDown == "up")
+                                {
+                                    ChangedRightSlice = foldername.Substring(foldername.Length - Convert.ToInt32(subparameter)).ToUpperInvariant();
+                                }
+                                else
+                                {
+                                    ChangedRightSlice = foldername.Substring(foldername.Length - Convert.ToInt32(subparameter)).ToLowerInvariant();
+                                }
+                                list[i].FileName = foldername.Substring(0, foldername.Length - Convert.ToInt32(subparameter)) + ChangedRightSlice;
+                            }
+                            break;
+                        case "firstletter":
+                            if (foldername.Length > 1)
+                            {
+                                if (UpDown == "up")
+                                {
+                                    list[i].FileName = char.ToUpper(foldername[0]) + foldername.Substring(1);
+                                }
+                                else
+                                {
+                                    list[i].FileName = char.ToLower(foldername[0]) + foldername.Substring(1);
+                                }
+                            }
+                            break;
+                        case "matchphase":
+                            if (!string.IsNullOrEmpty(subparameter))
+                            {
+                                if (UpDown == "up")
+                                {
+                                    list = ReplaceFolderName(list, subparameter, subparameter.ToUpperInvariant());
+                                }
+                                else
+                                {
+                                    list = ReplaceFolderName(list, subparameter, subparameter.ToLowerInvariant());
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+            return list;
+        }
+        public static List<FileToRename> InsertIntoFolderName(List<FileToRename> list, string mode, string position, string subparameter)
+        {
+            if (!string.IsNullOrEmpty(mode) && !string.IsNullOrEmpty(position) && !string.IsNullOrEmpty(subparameter) && list != null)
+            {
+                string[] auxp = null;
+                int Digit = 0, CurrentNo = 0, Steps = 0;
+                if (mode.ToLowerInvariant() == "digit" && subparameter.Contains(";"))
+                {
+                    auxp = subparameter.Split(';'); //length, start from , step
+                    Digit = Convert.ToInt32(auxp[0]); //length
+                    CurrentNo = Convert.ToInt32(auxp[1]); //start from
+                    Steps = Convert.ToInt32(auxp[2]); //step
+                }
+                string foldername = "", SubLeft = "", SubRight = "";
+                for (int i = 0; i < list.Count; i++)
+                {
+                    foldername = list[i].FileName;
+                    switch (mode.ToLowerInvariant())
+                    {
+                        case "phase":
+                            if (position == "0")
+                            {
+                                list = PrefixFileName(list, subparameter);
+                                return list;
+                            }
+                            else if (Convert.ToInt32(position) >= foldername.Length)
+                            {
+                                list = SuffixFileName(list, subparameter);
+                                return list;
+                            }
+                            else
+                            {
+                                SubLeft = foldername.Substring(0, Convert.ToInt32(position));
+                                SubRight = foldername.Substring(Convert.ToInt32(position));
+                                list[i].FileName = SubLeft + subparameter + SubRight;
+                            }
+                            break;
+                        case "digit":
+                            string strgen = CurrentNo.ToString();
+                            if (CurrentNo.ToString().Length != Digit)
+                            {
+                                while (strgen.Length != Digit)
+                                {
+                                    strgen = "0" + strgen;
+                                }
+                            }
+                            //switch (CurrentNo.ToString().Length)
+                            //{
+                            //    case 1:
+                            //        strgen = "00" + CurrentNo.ToString();
+                            //        break;
+                            //    case 2:
+                            //        strgen = "0" + CurrentNo.ToString();
+                            //        break;
+                            //    case 3:
+                            //        strgen = CurrentNo.ToString();
+                            //        break;
+                            //}
+                            if (Convert.ToInt32(position) > foldername.Length)
+                            {
+                                position = foldername.Length.ToString();
+                            }
+                            SubLeft = foldername.Substring(0, Convert.ToInt32(position));
+                            SubRight = foldername.Substring(Convert.ToInt32(position));
+                            list[i].FileName = SubLeft + strgen + SubRight;
                             if ((CurrentNo + Steps).ToString().Length > Digit || (CurrentNo + Steps) < 0)
                             {
                                 Steps = 0;
