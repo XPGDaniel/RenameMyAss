@@ -17,11 +17,8 @@ namespace RenameMyAss
     public partial class Form_Main : Form
     {
         private XMLHelper xmlH = new XMLHelper();
-        const int ALT = 32;
-        const int CTRL = 8;
-        const int SHIFT = 4;
-        const string WinRAR = @"C:\Program Files\WinRAR\WinRAR.exe";
         public bool MakeRAR = false;
+        private enum MoveDirection { Up = -1, Down = 1 };
         public Form_Main()
         {
             InitializeComponent();
@@ -36,28 +33,27 @@ namespace RenameMyAss
             button_Preview.Enabled = false;
             button_Rename.Enabled = false;
             AuxParameters_Control(false);
-            if(File.Exists(WinRAR)) comboBox_Target.Items.Add("FolderName");
+            if (File.Exists(GlobalConst.PATH_WINRAR)) comboBox_Target.Items.Add(GlobalConst.TARGETTYPE_FOLDERNAME);
         }
-        private enum MoveDirection { Up = -1, Down = 1 };
         #region ComboBoxes
         private void comboBox_Target_SelectedIndexChanged(object sender, EventArgs e)
         {
             comboBox_Mode.Items.Clear();
             AuxParameters_Control(false);
-            label_Parameter2.Text = "Parameter2";
-            switch (comboBox_Target.Text.ToLowerInvariant())
+            label_Parameter2.Text = GlobalConst.LABEL_PARAMETER2_DEFAULT;
+            switch (comboBox_Target.Text)
             {
-                case "filename":
-                case " fileextension":
-                case "foldername":
-                    comboBox_Mode.Items.Add("Prefix");
-                    comboBox_Mode.Items.Add("Suffix");
-                    comboBox_Mode.Items.Add("Remove");
-                    comboBox_Mode.Items.Add("Replace");
-                    comboBox_Mode.Items.Add("UPPERCASE");
-                    comboBox_Mode.Items.Add("lowercase");
-                    comboBox_Mode.Items.Add("Insert");
-                    if (comboBox_Target.Text.ToLowerInvariant() == "foldername") comboBox_Mode.Items.Add("MakeRAR");
+                case GlobalConst.TARGETTYPE_FILENAME:
+                case GlobalConst.TARGETTYPE_FILEEXTENSION:
+                case GlobalConst.TARGETTYPE_FOLDERNAME:
+                    comboBox_Mode.Items.Add(GlobalConst.MODETYPE_PREFIX);
+                    comboBox_Mode.Items.Add(GlobalConst.MODETYPE_SUFFIX);
+                    comboBox_Mode.Items.Add(GlobalConst.MODETYPE_REMOVE);
+                    comboBox_Mode.Items.Add(GlobalConst.MODETYPE_REPLACE);
+                    comboBox_Mode.Items.Add(GlobalConst.MODETYPE_UPPERCASE);
+                    comboBox_Mode.Items.Add(GlobalConst.MODETYPE_LOWERCASE);
+                    comboBox_Mode.Items.Add(GlobalConst.MODETYPE_INSERT);
+                    if (comboBox_Target.Text == GlobalConst.TARGETTYPE_FOLDERNAME) comboBox_Mode.Items.Add(GlobalConst.MODETYPE_MAKERAR);
                     comboBox_Mode.Visible = true;
                     label_Mode.Visible = true;
                     comboBox_Parameter1.Visible = true;
@@ -65,15 +61,6 @@ namespace RenameMyAss
                     comboBox_Parameter2.Visible = true;
                     label_Parameter2.Visible = true;
                     break;
-                //case "rarfolder":
-                //    comboBox_Mode.Text = "";
-                //    comboBox_Mode.Visible = false;
-                //    label_Mode.Visible = false;
-                //    comboBox_Parameter1.Visible = false;
-                //    label_Parameter1.Visible = false;
-                //    comboBox_Parameter2.Visible = false;
-                //    label_Parameter2.Visible = false;
-                //    break;
             }
         }
 
@@ -81,100 +68,97 @@ namespace RenameMyAss
         {
             comboBox_Parameter1.Items.Clear();
             AuxParameters_Control(false);
-            label_Parameter2.Text = "Parameter2";
-            switch (comboBox_Mode.Text.ToLowerInvariant())
+            label_Parameter2.Text = GlobalConst.LABEL_PARAMETER2_DEFAULT;
+            switch (comboBox_Mode.Text)
             {
-                case "prefix":
-                case "suffix":
-                    label_Parameter1.Text = "Target phase";
-                    comboBox_Parameter1.Text = "";
+                case GlobalConst.MODETYPE_PREFIX:
+                case GlobalConst.MODETYPE_SUFFIX:
+                    label_Parameter1.Text = GlobalConst.LABEL_PARAMETER1_TARGETPHASE;
+                    comboBox_Parameter1.Text = GlobalConst.EMPTY_STRING;
                     comboBox_Parameter2_Controls(false, null);
                     break;
-                case "replace":
-                    label_Parameter1.Text = "Target phase";
-                    comboBox_Parameter1.Text = "";
-                    comboBox_Parameter2_Controls(true, "Replace with");
+                case GlobalConst.MODETYPE_REPLACE:
+                    label_Parameter1.Text = GlobalConst.LABEL_PARAMETER1_TARGETPHASE;
+                    comboBox_Parameter1.Text = GlobalConst.EMPTY_STRING;
+                    comboBox_Parameter2_Controls(true, GlobalConst.LABEL_PARAMETER2_REPLACEWITH);
                     break;
-                case "remove":
-                case "uppercase":
-                case "lowercase":
-                    label_Parameter1.Text = "Pattern";
-                    comboBox_Parameter1.Text = "";
+                case GlobalConst.MODETYPE_REMOVE:
+                case GlobalConst.MODETYPE_UPPERCASE:
+                case GlobalConst.MODETYPE_LOWERCASE:
+                    label_Parameter1.Text = GlobalConst.LABEL_PARAMETER1_PATTERN;
+                    comboBox_Parameter1.Text = GlobalConst.EMPTY_STRING;
                     comboBox_Parameter2_Controls(false, null);
-                    comboBox_Parameter1.Items.Add("All");
-                    comboBox_Parameter1.Items.Add("Left");
-                    comboBox_Parameter1.Items.Add("Right");
-                    if (comboBox_Mode.Text.ToLowerInvariant() == "remove")
+                    comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_ALL);
+                    comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_LEFT);
+                    comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_RIGHT);
+                    if (comboBox_Mode.Text == GlobalConst.MODETYPE_REMOVE)
                     {
-                        comboBox_Parameter1.Items.Add("Center");
+                        comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_CENTER);
                     }
-                    comboBox_Parameter1.Items.Add("FirstLetter");
-                    comboBox_Parameter1.Items.Add("MatchPhase");
-                    if (comboBox_Mode.Text.ToLowerInvariant() == "remove")
+                    comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_FIRSTLETTER);
+                    comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_MATCHPHASE);
+                    if (comboBox_Mode.Text == GlobalConst.MODETYPE_REMOVE)
                     {
-                        comboBox_Parameter1.Items.Add("(*)");
-                        comboBox_Parameter1.Items.Add("(*");
-                        comboBox_Parameter1.Items.Add("*)");
+                        comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_BETWEENBRACKETS);
+                        comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_FROMLEFTBRACKET);
+                        comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_BEFORERIGHTBRACKET);
                     }
                     break;
-                case "insert":
-                    label_Parameter1.Text = "Pattern";
-                    comboBox_Parameter1.Text = "";
+                case GlobalConst.MODETYPE_INSERT:
+                    label_Parameter1.Text = GlobalConst.LABEL_PARAMETER1_PATTERN;
+                    comboBox_Parameter1.Text = GlobalConst.EMPTY_STRING;
                     comboBox_Parameter2_Controls(false, null);
-                    comboBox_Parameter1.Items.Add("Phase");
-                    comboBox_Parameter1.Items.Add("Digit");
+                    comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_PHASE);
+                    comboBox_Parameter1.Items.Add(GlobalConst.FUNCTYPE_DIGIT);
                     break;
-                case "makerar":
-                    label_Parameter1.Text = "Parameter1";
-                    comboBox_Parameter1.Text = "";
+                case GlobalConst.MODETYPE_MAKERAR:
+                    label_Parameter1.Text = GlobalConst.LABEL_PARAMETER1_DEFAULT;
+                    comboBox_Parameter1.Text = GlobalConst.EMPTY_STRING;
                     comboBox_Parameter2_Controls(false, null);
                     break;
-                //default:
-                //comboBox_Parameter1.Items.Clear();
-                //break;
             }
         }
         private void comboBox_Parameter1_SelectedIndexChanged(object sender, EventArgs e)
         {
             //AuxParameters_Control(false);
-            switch (comboBox_Mode.Text.ToLowerInvariant())
+            switch (comboBox_Mode.Text)
             {
-                case "remove":
-                case "uppercase":
-                case "lowercase":
-                    switch (comboBox_Parameter1.Text.ToLowerInvariant())
+                case GlobalConst.MODETYPE_REMOVE:
+                case GlobalConst.MODETYPE_UPPERCASE:
+                case GlobalConst.MODETYPE_LOWERCASE:
+                    switch (comboBox_Parameter1.Text)
                     {
-                        case "(*)":
-                        case "(*":
-                        case "*)":
-                        case "firstletter":
-                        case "all":
+                        case GlobalConst.FUNCTYPE_BETWEENBRACKETS:
+                        case GlobalConst.FUNCTYPE_FROMLEFTBRACKET:
+                        case GlobalConst.FUNCTYPE_BEFORERIGHTBRACKET:
+                        case GlobalConst.FUNCTYPE_FIRSTLETTER:
+                        case GlobalConst.FUNCTYPE_ALL:
                             comboBox_Parameter2_Controls(false, null);
                             break;
-                        case "left":
-                        case "right":
-                            comboBox_Parameter2_Controls(true, "Length");
+                        case GlobalConst.FUNCTYPE_LEFT:
+                        case GlobalConst.FUNCTYPE_RIGHT:
+                            comboBox_Parameter2_Controls(true, GlobalConst.LABEL_PARAMETER2_LENGTH);
                             break;
-                        case "center":
-                            comboBox_Parameter2_Controls(true, "Range");
+                        case GlobalConst.FUNCTYPE_CENTER:
+                            comboBox_Parameter2_Controls(true, GlobalConst.LABEL_PARAMETER2_RANGE);
                             break;
-                        case "matchphase":
-                            comboBox_Parameter2_Controls(true, "Target phase");
+                        case GlobalConst.FUNCTYPE_MATCHPHASE:
+                            comboBox_Parameter2_Controls(true, GlobalConst.LABEL_PARAMETER1_TARGETPHASE);
                             break;
                         default:
                             comboBox_Parameter2_Controls(false, null);
                             break;
                     }
                     break;
-                case "insert":
-                    comboBox_Parameter2_Controls(true, "Position");
-                    switch (comboBox_Parameter1.Text.ToLowerInvariant())
+                case GlobalConst.MODETYPE_INSERT:
+                    comboBox_Parameter2_Controls(true, GlobalConst.LABEL_PARAMETER2_POSITION);
+                    switch (comboBox_Parameter1.Text)
                     {
-                        case "phase":
-                            AuxParameters_Control(true, "Phase");
+                        case GlobalConst.FUNCTYPE_PHASE:
+                            AuxParameters_Control(true, GlobalConst.AUX_PARAMETER_PHASE);
                             break;
-                        case "digit":
-                            AuxParameters_Control(true, "Length", "Start from", "Step");
+                        case GlobalConst.FUNCTYPE_DIGIT:
+                            AuxParameters_Control(true, GlobalConst.AUX_PARAMETER_LENGTH, GlobalConst.AUX_PARAMETER_STARTFROM, GlobalConst.AUX_PARAMETER_STEP);
                             break;
                     }
                     break;
@@ -184,15 +168,15 @@ namespace RenameMyAss
         {
             comboBox_Parameter2.Enabled = Visibility;
             label_Parameter2.Visible = Visibility;
-            label_Parameter2.Text = !string.IsNullOrEmpty(label) ? label : "";
-            comboBox_Parameter2.Text = (label_Parameter2.Text == "Position" || label_Parameter2.Text == "Length") ? "0" : "";
+            label_Parameter2.Text = !string.IsNullOrEmpty(label) ? label : GlobalConst.EMPTY_STRING;
+            comboBox_Parameter2.Text = (label_Parameter2.Text == GlobalConst.LABEL_PARAMETER2_POSITION || label_Parameter2.Text == GlobalConst.LABEL_PARAMETER2_LENGTH) ? GlobalConst.ZERO : GlobalConst.EMPTY_STRING;
             comboBox_Parameter2.Visible = Visibility;
         }
         private void AuxParameters_Control(bool Visibility, string Ax1 = null, string Ax2 = null, string Ax3 = null)
         {
             label_AuxParameter1.Visible = Visibility;
-            label_AuxParameter1.Text = !string.IsNullOrEmpty(Ax1) ? Ax1 : "";
-            comboBox_AuxParameter1.Text = "";
+            label_AuxParameter1.Text = !string.IsNullOrEmpty(Ax1) ? Ax1 : GlobalConst.EMPTY_STRING;
+            comboBox_AuxParameter1.Text = GlobalConst.EMPTY_STRING;
             comboBox_AuxParameter1.Visible = Visibility;
             comboBox_AuxParameter1.Enabled = Visibility;
 
@@ -201,8 +185,8 @@ namespace RenameMyAss
                 Visibility = false;
             }
             label_AuxParameter2.Visible = Visibility;
-            label_AuxParameter2.Text = !string.IsNullOrEmpty(Ax2) ? Ax2 : "";
-            comboBox_AuxParameter2.Text = "";
+            label_AuxParameter2.Text = !string.IsNullOrEmpty(Ax2) ? Ax2 : GlobalConst.EMPTY_STRING;
+            comboBox_AuxParameter2.Text = GlobalConst.EMPTY_STRING;
             comboBox_AuxParameter2.Visible = Visibility;
             comboBox_AuxParameter2.Enabled = Visibility;
 
@@ -211,8 +195,8 @@ namespace RenameMyAss
                 Visibility = false;
             }
             label_AuxParameter3.Visible = Visibility;
-            label_AuxParameter3.Text = !string.IsNullOrEmpty(Ax3) ? Ax3 : "";
-            comboBox_AuxParameter3.Text = "";
+            label_AuxParameter3.Text = !string.IsNullOrEmpty(Ax3) ? Ax3 : GlobalConst.EMPTY_STRING;
+            comboBox_AuxParameter3.Text = GlobalConst.EMPTY_STRING;
             comboBox_AuxParameter3.Visible = Visibility;
             comboBox_AuxParameter3.Enabled = Visibility;
         }
@@ -234,85 +218,85 @@ namespace RenameMyAss
                 {
                     foreach (ListViewItem rule in listView_Rules.Items)
                     {
-                        switch (rule.Text.ToLowerInvariant())
+                        switch (rule.Text)
                         {
-                            case "filename":
-                                switch (rule.SubItems[1].Text.ToLowerInvariant())
+                            case GlobalConst.TARGETTYPE_FILENAME:
+                                switch (rule.SubItems[1].Text)
                                 {
-                                    case "remove":
+                                    case GlobalConst.MODETYPE_REMOVE:
                                         newFilenameList = RuleHandler.RemoveFileName(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "replace":
+                                    case GlobalConst.MODETYPE_REPLACE:
                                         newFilenameList = RuleHandler.ReplaceFileName(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "prefix":
+                                    case GlobalConst.MODETYPE_PREFIX:
                                         newFilenameList = RuleHandler.PrefixFileName(newFilenameList, rule.SubItems[2].Text);
                                         break;
-                                    case "suffix":
+                                    case GlobalConst.MODETYPE_SUFFIX:
                                         newFilenameList = RuleHandler.SuffixFileName(newFilenameList, rule.SubItems[2].Text);
                                         break;
-                                    case "uppercase":
-                                        newFilenameList = RuleHandler.ChangeFileNameCase(newFilenameList, "up", rule.SubItems[2].Text, rule.SubItems[3].Text);
+                                    case GlobalConst.MODETYPE_UPPERCASE:
+                                        newFilenameList = RuleHandler.ChangeFileNameCase(newFilenameList, GlobalConst.MOVE_UP, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "lowercase":
-                                        newFilenameList = RuleHandler.ChangeFileNameCase(newFilenameList, "down", rule.SubItems[2].Text, rule.SubItems[3].Text);
+                                    case GlobalConst.MODETYPE_LOWERCASE:
+                                        newFilenameList = RuleHandler.ChangeFileNameCase(newFilenameList, GlobalConst.MOVE_DOWN, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "insert":
+                                    case GlobalConst.MODETYPE_INSERT:
                                         newFilenameList = RuleHandler.InsertIntoFileName(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text, rule.SubItems[4].Text);
                                         break;
                                 }
                                 break;
-                            case "fileextension":
-                                switch (rule.SubItems[1].Text.ToLowerInvariant())
+                            case GlobalConst.TARGETTYPE_FILEEXTENSION:
+                                switch (rule.SubItems[1].Text)
                                 {
-                                    case "remove":
+                                    case GlobalConst.MODETYPE_REMOVE:
                                         newFilenameList = RuleHandler.RemoveFileExtension(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "replace":
+                                    case GlobalConst.MODETYPE_REPLACE:
                                         newFilenameList = RuleHandler.ReplaceFileExtension(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "prefix":
+                                    case GlobalConst.MODETYPE_PREFIX:
                                         newFilenameList = RuleHandler.PrefixFileExtension(newFilenameList, rule.SubItems[2].Text);
                                         break;
-                                    case "suffix":
+                                    case GlobalConst.MODETYPE_SUFFIX:
                                         newFilenameList = RuleHandler.SuffixFileExtension(newFilenameList, rule.SubItems[2].Text);
                                         break;
-                                    case "uppercase":
-                                        newFilenameList = RuleHandler.ChangeFileExtensionCase(newFilenameList, "up", rule.SubItems[2].Text, rule.SubItems[3].Text);
+                                    case GlobalConst.MODETYPE_UPPERCASE:
+                                        newFilenameList = RuleHandler.ChangeFileExtensionCase(newFilenameList, GlobalConst.MOVE_UP, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "lowercase":
-                                        newFilenameList = RuleHandler.ChangeFileExtensionCase(newFilenameList, "down", rule.SubItems[2].Text, rule.SubItems[3].Text);
+                                    case GlobalConst.MODETYPE_LOWERCASE:
+                                        newFilenameList = RuleHandler.ChangeFileExtensionCase(newFilenameList, GlobalConst.MOVE_DOWN, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "insert":
+                                    case GlobalConst.MODETYPE_INSERT:
                                         newFilenameList = RuleHandler.InsertIntoFileExtension(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text, rule.SubItems[4].Text);
                                         break;
                                 }
                                 break;
-                            case "foldername":
-                                switch (rule.SubItems[1].Text.ToLowerInvariant())
+                            case GlobalConst.TARGETTYPE_FOLDERNAME:
+                                switch (rule.SubItems[1].Text)
                                 {
-                                    case "remove":
+                                    case GlobalConst.MODETYPE_REMOVE:
                                         newFilenameList = RuleHandler.RemoveFolderName(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "replace":
+                                    case GlobalConst.MODETYPE_REPLACE:
                                         newFilenameList = RuleHandler.ReplaceFolderName(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "prefix":
+                                    case GlobalConst.MODETYPE_PREFIX:
                                         newFilenameList = RuleHandler.PrefixFolderName(newFilenameList, rule.SubItems[2].Text);
                                         break;
-                                    case "suffix":
+                                    case GlobalConst.MODETYPE_SUFFIX:
                                         newFilenameList = RuleHandler.SuffixFolderName(newFilenameList, rule.SubItems[2].Text);
                                         break;
-                                    case "uppercase":
-                                        newFilenameList = RuleHandler.ChangeFolderNameCase(newFilenameList, "up", rule.SubItems[2].Text, rule.SubItems[3].Text);
+                                    case GlobalConst.MODETYPE_UPPERCASE:
+                                        newFilenameList = RuleHandler.ChangeFolderNameCase(newFilenameList, GlobalConst.MOVE_UP, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "lowercase":
-                                        newFilenameList = RuleHandler.ChangeFolderNameCase(newFilenameList, "down", rule.SubItems[2].Text, rule.SubItems[3].Text);
+                                    case GlobalConst.MODETYPE_LOWERCASE:
+                                        newFilenameList = RuleHandler.ChangeFolderNameCase(newFilenameList, GlobalConst.MOVE_DOWN, rule.SubItems[2].Text, rule.SubItems[3].Text);
                                         break;
-                                    case "insert":
+                                    case GlobalConst.MODETYPE_INSERT:
                                         newFilenameList = RuleHandler.InsertIntoFolderName(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text, rule.SubItems[4].Text);
                                         break;
-                                    case "makerar":
+                                    case GlobalConst.MODETYPE_MAKERAR:
                                         MakeRAR = true;
                                         break;
                                 }
@@ -345,9 +329,9 @@ namespace RenameMyAss
                 if (RenameList.Any())
                 {
 
-                    switch (comboBox_Target.Text.ToLowerInvariant())
+                    switch (comboBox_Target.Text)
                     {
-                        case "foldername":
+                        case GlobalConst.TARGETTYPE_FOLDERNAME:
                             foreach (FileToRename fileCandidate in RenameList)
                             {
                                 if (Directory.Exists(fileCandidate.Path))
@@ -359,19 +343,17 @@ namespace RenameMyAss
                                             if (fileCandidate.Path != Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName)
                                             {
                                                 Directory.Move(fileCandidate.Path, Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName);
-                                                fileCandidate.Result = "Rename OK";
+                                                fileCandidate.Result = GlobalConst.RESULT_RENAME_OK;
                                             }
                                             if (MakeRAR)
-                                            {//"C:\Program Files\WinRAR\WinRAR.exe" a -ep "C:\Users\Hüseyin\Desktop\deneme.rar" "C:\Users\Hüseyin\Desktop\AA\"
+                                            {
                                                 using (Process p = new Process())
                                                 {
-                                                    p.StartInfo.FileName = "cmd.exe";
-                                                    p.StartInfo.FileName = WinRAR;
-                                                    p.StartInfo.RedirectStandardOutput = true;
-                                                    p.StartInfo.RedirectStandardError = true;
+                                                    p.StartInfo.FileName = GlobalConst.PATH_WINRAR;
+                                                    //p.StartInfo.RedirectStandardOutput = true;
+                                                    //p.StartInfo.RedirectStandardError = true;
                                                     p.StartInfo.UseShellExecute = false;
                                                     p.StartInfo.CreateNoWindow = false; //Default:true
-                                                    //p.StartInfo.Arguments = "/c \"\"" + WinRAR + "\" a -ep1 -r \"" + Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName + ".rar\" \"" + Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName + "\\*\" -rr3p\"";
                                                     p.StartInfo.Arguments = " a -ep1 -r \"" + Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName + ".rar\" \"" + Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName + "\\*\" -rr3p";
                                                     p.Start();
                                                     //string stdoutx = p.StandardOutput.ReadToEnd();
@@ -380,19 +362,18 @@ namespace RenameMyAss
                                                     //Console.WriteLine("Exit code : {0}", p.ExitCode);
                                                     //Console.WriteLine("Stdout : {0}", stdoutx);
                                                     //Console.WriteLine("Stderr : {0}", stderrx);
-                                                    fileCandidate.Result += "RAR OK";
+                                                    fileCandidate.Result += GlobalConst.RESULT_RAR_OK;
                                                 }
                                             }
                                         }
                                         else
                                         {
-                                            fileCandidate.Result = "Invalid new FolderName";
+                                            fileCandidate.Result = GlobalConst.RESULT_INVALID_NEW_FOLDERNAME;
                                         }
                                     }
                                     catch (Exception)
                                     {
-                                        fileCandidate.Result = "Rename Fail";
-                                        //throw;
+                                        fileCandidate.Result = GlobalConst.RESULT_RENAME_FAIL;
                                     }
                                 }
                             }
@@ -408,17 +389,16 @@ namespace RenameMyAss
                                         if (!string.IsNullOrEmpty(Path.GetFileNameWithoutExtension(fileCandidate.NewFileName)) && !string.IsNullOrEmpty(Path.GetExtension(fileCandidate.NewFileName)))
                                         {
                                             File.Move(fi.FullName, fi.FullName.Replace(fileCandidate.FileName, fileCandidate.NewFileName));
-                                            fileCandidate.Result = "Rename OK";
+                                            fileCandidate.Result = GlobalConst.RESULT_RENAME_OK;
                                         }
                                         else
                                         {
-                                            fileCandidate.Result = "Invalid new Filename or Extension";
+                                            fileCandidate.Result = GlobalConst.RESULT_INVALID_NEW_FILENAME_FILEEXTENSION;
                                         }
                                     }
                                     catch (Exception)
                                     {
-                                        fileCandidate.Result = "Rename Fail";
-                                        //throw;
+                                        fileCandidate.Result = GlobalConst.RESULT_RENAME_FAIL;
                                     }
                                 }
                             }
@@ -452,9 +432,9 @@ namespace RenameMyAss
                 }
                 if (UndoList.Any())
                 {
-                    switch (comboBox_Target.Text.ToLowerInvariant())
+                    switch (comboBox_Target.Text)
                     {
-                        case "foldername":
+                        case GlobalConst.TARGETTYPE_FOLDERNAME:
                             foreach (FileToRename fileCandidate in UndoList)
                             {
                                 string CurrentNewFolderName = Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName;
@@ -462,14 +442,12 @@ namespace RenameMyAss
                                 {
                                     try
                                     {
-                                        //FileInfo fi = new FileInfo(CurrentNewFileName);
                                         Directory.Move(CurrentNewFolderName, fileCandidate.Path);
-                                        fileCandidate.Result = "Undo OK";
+                                        fileCandidate.Result = GlobalConst.RESULT_UNDO_OK;
                                     }
                                     catch (Exception)
                                     {
-                                        fileCandidate.Result = "Undo Fail";
-                                        //throw;
+                                        fileCandidate.Result = GlobalConst.RESULT_UNDO_FAIL;
                                     }
                                 }
                             }
@@ -482,14 +460,12 @@ namespace RenameMyAss
                                 {
                                     try
                                     {
-                                        FileInfo fi = new FileInfo(CurrentNewFileName);
-                                        File.Move(fi.FullName, fi.FullName.Replace(fileCandidate.NewFileName, fileCandidate.FileName));
-                                        fileCandidate.Result = "Undo OK";
+                                        File.Move(CurrentNewFileName, CurrentNewFileName.Replace(fileCandidate.NewFileName, fileCandidate.FileName));
+                                        fileCandidate.Result = GlobalConst.RESULT_UNDO_OK;
                                     }
                                     catch (Exception)
                                     {
-                                        fileCandidate.Result = "Undo Fail";
-                                        //throw;
+                                        fileCandidate.Result = GlobalConst.RESULT_UNDO_FAIL;
                                     }
                                 }
                             }
@@ -506,55 +482,24 @@ namespace RenameMyAss
             }
         }
 
-        ///// <summary>
-        ///// Routine to refresh the display
-        ///// </summary>
-        //private void RefreshView()
-        //{
-        //    //listView_FileList.Items.Clear();
-        //    //string[] files = Directory.GetFiles(homeFolder);
-        //    //foreach (string file in files)
-        //    //{
-        //    //    listView_FileList.Items.Add(file);
-        //    //}
-        //}
-
-        /// <summary>
-        /// Routine to get the current selection from the listview
-        /// </summary>
-        /// <returns>Seletced items or null if no selection</returns>
-        //private string[] GetSelection()
-        //{
-        //    if (listView_FileList.SelectedItems.Count == 0)
-        //        return null;
-
-        //    string[] files = new string[listView_FileList.SelectedItems.Count];
-        //    int i = 0;
-        //    foreach (ListViewItem item in listView_FileList.SelectedItems)
-        //    {
-        //        files[i++] = item.Text;
-        //    }
-        //    return files;
-        //}
 
         #region listView_FileList
         private void listView_FileList_DragDrop(object sender, DragEventArgs e)
         {
-            foreach (var s in (string[])e.Data.GetData(DataFormats.FileDrop, false))
+            foreach (string s in (string[])e.Data.GetData(DataFormats.FileDrop, false))
             {
                 if (Directory.Exists(s))
-                {
-                    //Add files from folder
-                    switch (comboBox_Target.Text.ToLowerInvariant())
+                {//Add files from folder
+                    switch (comboBox_Target.Text)
                     {
-                        case "foldername":
+                        case GlobalConst.TARGETTYPE_FOLDERNAME:
                             ListViewItem lvid = new ListViewItem();
                             DirectoryInfo di = new DirectoryInfo(s);
                             lvid.Name = di.FullName;
                             lvid.Text = s;
                             lvid.SubItems.Add(di.Name);
-                            lvid.SubItems.Add("");
-                            lvid.SubItems.Add("");
+                            lvid.SubItems.Add(GlobalConst.EMPTY_STRING);
+                            lvid.SubItems.Add(GlobalConst.EMPTY_STRING);
                             listView_FileList.Items.Add(lvid);
                             listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, lvid, lvid.Index));
                             break;
@@ -568,8 +513,8 @@ namespace RenameMyAss
                                 lvi.Name = fi.FullName;
                                 lvi.Text = item;
                                 lvi.SubItems.Add(fi.Name);
-                                lvi.SubItems.Add("");
-                                lvi.SubItems.Add("");
+                                lvi.SubItems.Add(GlobalConst.EMPTY_STRING);
+                                lvi.SubItems.Add(GlobalConst.EMPTY_STRING);
                                 listView_FileList.Items.Add(lvi);
                                 listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, lvi, lvi.Index));
                             }
@@ -587,8 +532,8 @@ namespace RenameMyAss
                             lvi.Name = fi.FullName;
                             lvi.Text = s;
                             lvi.SubItems.Add(fi.Name);
-                            lvi.SubItems.Add("");
-                            lvi.SubItems.Add("");
+                            lvi.SubItems.Add(GlobalConst.EMPTY_STRING);
+                            lvi.SubItems.Add(GlobalConst.EMPTY_STRING);
                             listView_FileList.Items.Add(lvi);
                             listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, lvi, lvi.Index));
                         }
@@ -636,13 +581,13 @@ namespace RenameMyAss
             }
 
             // Set the effect based upon the KeyState.
-            if ((e.KeyState & SHIFT) == SHIFT &&
+            if ((e.KeyState & GlobalConst.KEY_SHIFT) == GlobalConst.KEY_SHIFT &&
                 (e.AllowedEffect & DragDropEffects.Move) == DragDropEffects.Move)
             {
                 e.Effect = DragDropEffects.Move;
 
             }
-            else if ((e.KeyState & CTRL) == CTRL &&
+            else if ((e.KeyState & GlobalConst.KEY_CTRL) == GlobalConst.KEY_CTRL &&
                 (e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
             {
                 e.Effect = DragDropEffects.Copy;
@@ -652,20 +597,15 @@ namespace RenameMyAss
                 // By default, the drop action should be move, if allowed.
                 e.Effect = DragDropEffects.Move;
 
-                // Implement the rather strange behaviour of explorer that if the disk
-                // is different, then default to a COPY operation
-                switch (comboBox_Target.Text.ToLowerInvariant())
+                switch (comboBox_Target.Text)
                 {
-                    case "foldername":
+                    case GlobalConst.TARGETTYPE_FOLDERNAME:
                         string[] folders = (string[])e.Data.GetData(DataFormats.FileDrop);
                         if (folders.Length > 0 && (e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
                             e.Effect = DragDropEffects.Copy;
                         break;
                     default:
                         string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                        //if (files.Length > 0 && !files[0].ToUpper().StartsWith(homeDisk) &&
-                        //    // Probably better ways to do this
-                        //(e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
                         if (files.Length > 0 && (e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
                             e.Effect = DragDropEffects.Copy;
                         break;
@@ -683,15 +623,14 @@ namespace RenameMyAss
         {
             listView_FileList.Items.Clear();
             listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-            //MakeRAR = false;
             button_RemovefromList.Enabled = false;
+            button_Undo.Enabled = false;
         }
 
         private void button_RemovefromList_Click(object sender, EventArgs e)
         {
             if (listView_FileList.SelectedItems.Count != 0)
             {
-
                 string[] files = new string[listView_FileList.SelectedItems.Count];
                 foreach (ListViewItem item in listView_FileList.SelectedItems)
                 {
@@ -718,20 +657,20 @@ namespace RenameMyAss
             {
                 comboBox_Target.Text = listView_Rules.SelectedItems[0].Text;
                 comboBox_Mode.Text = listView_Rules.SelectedItems[0].SubItems[1].Text;
-                comboBox_Parameter1.Text = string.IsNullOrEmpty(listView_Rules.SelectedItems[0].SubItems[2].Text) ? "" : listView_Rules.SelectedItems[0].SubItems[2].Text;
-                comboBox_Parameter2.Text = string.IsNullOrEmpty(listView_Rules.SelectedItems[0].SubItems[3].Text) ? "" : listView_Rules.SelectedItems[0].SubItems[3].Text;
+                comboBox_Parameter1.Text = string.IsNullOrEmpty(listView_Rules.SelectedItems[0].SubItems[2].Text) ? GlobalConst.EMPTY_STRING : listView_Rules.SelectedItems[0].SubItems[2].Text;
+                comboBox_Parameter2.Text = string.IsNullOrEmpty(listView_Rules.SelectedItems[0].SubItems[3].Text) ? GlobalConst.EMPTY_STRING : listView_Rules.SelectedItems[0].SubItems[3].Text;
                 button_UpdateRule.Enabled = true;
                 button_MoveUp.Enabled = true;
                 button_MoveDown.Enabled = true;
                 button_RemoveRule.Enabled = true;
-                if (comboBox_Mode.Text.ToLowerInvariant() == "insert")
+                if (comboBox_Mode.Text == GlobalConst.MODETYPE_INSERT)
                 {
-                    switch (comboBox_Parameter1.Text.ToLowerInvariant())
+                    switch (comboBox_Parameter1.Text)
                     {
-                        case "phase":
-                            comboBox_AuxParameter1.Text = string.IsNullOrEmpty(listView_Rules.SelectedItems[0].SubItems[4].Text) ? "" : listView_Rules.SelectedItems[0].SubItems[4].Text; ;
+                        case GlobalConst.FUNCTYPE_PHASE:
+                            comboBox_AuxParameter1.Text = string.IsNullOrEmpty(listView_Rules.SelectedItems[0].SubItems[4].Text) ? GlobalConst.EMPTY_STRING : listView_Rules.SelectedItems[0].SubItems[4].Text; ;
                             break;
-                        case "digit":
+                        case GlobalConst.FUNCTYPE_DIGIT:
                             string[] auxsplit = listView_Rules.SelectedItems[0].SubItems[4].Text.Split(';');
                             comboBox_AuxParameter1.Text = auxsplit[0];
                             comboBox_AuxParameter2.Text = auxsplit[1];
@@ -745,10 +684,10 @@ namespace RenameMyAss
         private void button_AddRule_Click(object sender, EventArgs e)
         {
             if ((!string.IsNullOrEmpty(comboBox_Target.Text) && !string.IsNullOrEmpty(comboBox_Mode.Text) && !string.IsNullOrEmpty(comboBox_Parameter1.Text)) ||
-            (comboBox_Target.Text.ToLowerInvariant() == "foldername" && comboBox_Mode.Text.ToLowerInvariant() == "makerar"))
+            (comboBox_Target.Text == GlobalConst.TARGETTYPE_FOLDERNAME && comboBox_Mode.Text == GlobalConst.MODETYPE_MAKERAR))
             {
                 ListViewItem lvi = new ListViewItem();
-                lvi.Text = comboBox_Target.SelectedItem.ToString();
+                lvi.Text = comboBox_Target.Text;
                 lvi.SubItems.Add(comboBox_Mode.Text);
                 if (!string.IsNullOrEmpty(comboBox_Parameter1.Text))
                 {
@@ -756,13 +695,13 @@ namespace RenameMyAss
                 }
                 else
                 {
-                    lvi.SubItems.Add("");
+                    lvi.SubItems.Add(GlobalConst.EMPTY_STRING);
                 }
                 if (!string.IsNullOrEmpty(comboBox_Parameter2.Text))
                 {
-                    switch (comboBox_Parameter1.Text.ToLowerInvariant())
+                    switch (comboBox_Parameter1.Text)
                     {
-                        case "left":
+                        case GlobalConst.FUNCTYPE_LEFT:
                             try
                             {
                                 Convert.ToInt32(comboBox_Parameter2.Text);
@@ -770,10 +709,10 @@ namespace RenameMyAss
                             catch (Exception)
                             {
                                 MessageBox.Show("Numbers only !");
-                                comboBox_Parameter2.Text = "0";
+                                comboBox_Parameter2.Text = GlobalConst.ZERO;
                             }
                             break;
-                        case "right":
+                        case GlobalConst.FUNCTYPE_RIGHT:
                             try
                             {
                                 Convert.ToInt32(comboBox_Parameter2.Text);
@@ -781,7 +720,7 @@ namespace RenameMyAss
                             catch (Exception)
                             {
                                 MessageBox.Show("Numbers only !");
-                                comboBox_Parameter2.Text = "0";
+                                comboBox_Parameter2.Text = GlobalConst.ZERO;
                             }
                             break;
                         default:
@@ -791,29 +730,29 @@ namespace RenameMyAss
                 }
                 else
                 {
-                    lvi.SubItems.Add("");
+                    lvi.SubItems.Add(GlobalConst.EMPTY_STRING);
                 }
-                if (comboBox_Mode.Text.ToLowerInvariant() == "insert")
+                if (comboBox_Mode.Text == GlobalConst.MODETYPE_INSERT)
                 {
-                    string aux = "";
-                    switch (comboBox_Parameter1.Text.ToLowerInvariant())
+                    string aux = GlobalConst.EMPTY_STRING;
+                    switch (comboBox_Parameter1.Text)
                     {
-                        case "phase":
+                        case GlobalConst.FUNCTYPE_PHASE:
                             aux = comboBox_AuxParameter1.Text;
                             break;
-                        case "digit":
+                        case GlobalConst.FUNCTYPE_DIGIT:
                             if (!string.IsNullOrEmpty(comboBox_AuxParameter1.Text) && !string.IsNullOrEmpty(comboBox_AuxParameter2.Text) && !string.IsNullOrEmpty(comboBox_AuxParameter3.Text))
-                                aux = string.Join(";", new string[] { comboBox_AuxParameter1.Text, comboBox_AuxParameter2.Text, comboBox_AuxParameter3.Text });
+                                aux = string.Join(GlobalConst.AUX_CONNECTOR, new string[] { comboBox_AuxParameter1.Text, comboBox_AuxParameter2.Text, comboBox_AuxParameter3.Text });
                             break;
                     }
                     if (!string.IsNullOrEmpty(aux)) lvi.SubItems.Add(aux);
-                    comboBox_AuxParameter1.Text = "";
-                    comboBox_AuxParameter2.Text = "";
-                    comboBox_AuxParameter3.Text = "";
+                    comboBox_AuxParameter1.Text = GlobalConst.EMPTY_STRING;
+                    comboBox_AuxParameter2.Text = GlobalConst.EMPTY_STRING;
+                    comboBox_AuxParameter3.Text = GlobalConst.EMPTY_STRING;
                 }
                 listView_Rules.Items.Add(lvi);
-                comboBox_Parameter1.Text = (comboBox_Mode.Text.ToLowerInvariant() == "insert") ? comboBox_Parameter1.Text : "";
-                comboBox_Parameter2.Text = "";
+                comboBox_Parameter1.Text = (comboBox_Mode.Text == GlobalConst.MODETYPE_INSERT) ? comboBox_Parameter1.Text : GlobalConst.EMPTY_STRING;
+                comboBox_Parameter2.Text = GlobalConst.EMPTY_STRING;
                 listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, lvi, lvi.Index));
             }
         }
@@ -828,16 +767,16 @@ namespace RenameMyAss
                 listView_Rules.SelectedItems[0].SubItems[2].Text = comboBox_Parameter1.Text;
                 listView_Rules.SelectedItems[0].SubItems[3].Text = comboBox_Parameter2.Text;
                 button_UpdateRule.Enabled = false;
-                if (comboBox_Mode.Text.ToLowerInvariant() == "insert")
+                if (comboBox_Mode.Text == GlobalConst.MODETYPE_INSERT)
                 {
-                    switch (comboBox_Parameter1.Text.ToLowerInvariant())
+                    switch (comboBox_Parameter1.Text)
                     {
-                        case "phase":
+                        case GlobalConst.FUNCTYPE_PHASE:
                             listView_Rules.SelectedItems[0].SubItems[4].Text = comboBox_AuxParameter1.Text;
                             break;
-                        case "digit":
+                        case GlobalConst.FUNCTYPE_DIGIT:
                             if (!string.IsNullOrEmpty(comboBox_AuxParameter1.Text) && !string.IsNullOrEmpty(comboBox_AuxParameter2.Text) && !string.IsNullOrEmpty(comboBox_AuxParameter3.Text))
-                                listView_Rules.SelectedItems[0].SubItems[4].Text = string.Join(";", new string[] { comboBox_AuxParameter1.Text, comboBox_AuxParameter2.Text, comboBox_AuxParameter3.Text });
+                                listView_Rules.SelectedItems[0].SubItems[4].Text = string.Join(GlobalConst.AUX_CONNECTOR, new string[] { comboBox_AuxParameter1.Text, comboBox_AuxParameter2.Text, comboBox_AuxParameter3.Text });
                             break;
                     }
                 }
@@ -894,7 +833,7 @@ namespace RenameMyAss
                 string[] files = new string[listView_Rules.SelectedItems.Count];
                 foreach (ListViewItem item in listView_Rules.SelectedItems)
                 {
-                    if (item.SubItems[1].Text.ToLowerInvariant() == "makerar") MakeRAR = false;
+                    if (item.SubItems[1].Text.ToLowerInvariant() == GlobalConst.MODETYPE_MAKERAR) MakeRAR = false;
                     listView_Rules.Items.Remove(item);
                 }
                 if (listView_Rules.Items.Count == 0)
@@ -915,7 +854,7 @@ namespace RenameMyAss
                 if (Itemlist.Any())
                 {
                     SaveFileDialog saveFileDialog = new SaveFileDialog();
-                    saveFileDialog.Filter = "XML-File | *.xml";
+                    saveFileDialog.Filter = GlobalConst.FILETYPE_XML_FILTER;
                     if (saveFileDialog.ShowDialog() == DialogResult.OK)
                     {
                         xmlH.SaveProfileXML(Itemlist, saveFileDialog.FileName);
@@ -926,17 +865,17 @@ namespace RenameMyAss
         private void button_LoadProfile_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "XML Files (*.xml)|*.xml";
+            ofd.Filter = GlobalConst.FILETYPE_XML_FILTER;
             ofd.FilterIndex = 0;
-            ofd.DefaultExt = "xml";
+            ofd.DefaultExt = GlobalConst.FILETYPE_XML;
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 if (!String.Equals(Path.GetExtension(ofd.FileName),
-                                   ".xml",
+                                   "." + GlobalConst.FILETYPE_XML,
                                    StringComparison.OrdinalIgnoreCase))
                 {
                     // Invalid file type selected; display an error.
-                    MessageBox.Show("The type of the selected file is not supported by this application. You must select an XML file.",
+                    MessageBox.Show("The type of the selected file is not supported by this application. You must select an " + GlobalConst.FILETYPE_XML + " file.",
                                     "Invalid File Type",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);

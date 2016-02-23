@@ -344,7 +344,7 @@
             // 
             // button_Rename
             // 
-            this.button_Rename.Location = new System.Drawing.Point(416, 326);
+            this.button_Rename.Location = new System.Drawing.Point(416, 320);
             this.button_Rename.Name = "button_Rename";
             this.button_Rename.Size = new System.Drawing.Size(60, 35);
             this.button_Rename.TabIndex = 18;
@@ -364,7 +364,7 @@
             // 
             // button_Undo
             // 
-            this.button_Undo.Location = new System.Drawing.Point(350, 326);
+            this.button_Undo.Location = new System.Drawing.Point(350, 320);
             this.button_Undo.Name = "button_Undo";
             this.button_Undo.Size = new System.Drawing.Size(60, 35);
             this.button_Undo.TabIndex = 18;

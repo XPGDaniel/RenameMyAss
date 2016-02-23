@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class\FileToRename.cs" />
+    <Compile Include="Class\GlobalConst.cs" />
     <Compile Include="Class\RuleHandler.cs" />
     <Compile Include="Class\Rules.cs" />
     <Compile Include="Class\XMLHelper.cs" />

@@ -14,27 +14,27 @@ namespace RenameMyAss.Class
         {
             if (!string.IsNullOrEmpty(mode) && list != null)
             {
-                string filename = "", extension = "";
+                string filename = GlobalConst.EMPTY_STRING, extension = GlobalConst.EMPTY_STRING;
                 for (int i = 0; i < list.Count; i++)
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName);
                     switch (mode.ToLowerInvariant())
                     {
-                        case "all":
+                        case GlobalConst.FUNCTYPE_ALL:
                             list[i].FileName = extension;
                             break;
-                        case "left":
+                        case GlobalConst.FUNCTYPE_LEFT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (filename.Length < Convert.ToInt32(subparameter))
                                 {
                                     subparameter = Convert.ToString(filename.Length);
                                 }
-                                list[i].FileName = filename.Substring(0+Convert.ToInt32(subparameter)) + extension;
+                                list[i].FileName = filename.Substring(0 + Convert.ToInt32(subparameter)) + extension;
                             }
                             break;
-                        case "right":
+                        case GlobalConst.FUNCTYPE_RIGHT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (filename.Length < Convert.ToInt32(subparameter))
@@ -44,11 +44,11 @@ namespace RenameMyAss.Class
                                 list[i].FileName = filename.Substring(0, filename.Length - Convert.ToInt32(subparameter)) + extension;
                             }
                             break;
-                        case "center":
+                        case GlobalConst.FUNCTYPE_CENTER:
                             if (!string.IsNullOrEmpty(subparameter) && filename.Length >= 3)
                             {
-                                int center = Convert.ToInt32(Math.Ceiling((Convert.ToDouble(filename.Length) / 2))), leftlength =0, rightlength=0;
-                                if (filename.Length < (Convert.ToInt32(subparameter)*2))
+                                int center = Convert.ToInt32(Math.Ceiling((Convert.ToDouble(filename.Length) / 2))), leftlength = 0, rightlength = 0;
+                                if (filename.Length < (Convert.ToInt32(subparameter) * 2))
                                 {
                                     subparameter = Convert.ToString(center);
                                 }
@@ -60,7 +60,7 @@ namespace RenameMyAss.Class
                                 {
                                     rightlength = Convert.ToInt32(subparameter);
                                 }
-                                if (center - Convert.ToInt32(subparameter)<0)
+                                if (center - Convert.ToInt32(subparameter) < 0)
                                 {
                                     leftlength = 0;
                                 }
@@ -71,30 +71,30 @@ namespace RenameMyAss.Class
                                 list[i].FileName = filename.Substring(0, center - leftlength - 1) + filename.Substring(center + rightlength) + extension;
                             }
                             break;
-                        case "firstletter":
+                        case GlobalConst.FUNCTYPE_FIRSTLETTER:
                             if (filename.Length > 1)
                             {
                                 list[i].FileName = filename.Substring(1) + extension;
                             }
                             break;
-                        case "matchphase":
+                        case GlobalConst.FUNCTYPE_MATCHPHASE:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
-                                list = ReplaceFileName(list, subparameter, "");
+                                list = ReplaceFileName(list, subparameter, GlobalConst.EMPTY_STRING);
                             }
                             break;
-                        case "(*)":
+                        case GlobalConst.FUNCTYPE_BETWEENBRACKETS:
                             string regex = "(\\(.*\\))"; //"(\\[.*\\])|(\".*\")|('.*')|(\\(.*\\))";
-                            list[i].FileName = Regex.Replace(filename, regex, "") + extension;
+                            list[i].FileName = Regex.Replace(filename, regex, GlobalConst.EMPTY_STRING) + extension;
                             break;
-                        case "(*":
+                        case GlobalConst.FUNCTYPE_FROMLEFTBRACKET:
                             int LeftBucketIndex = filename.IndexOf('(');
                             if (LeftBucketIndex > 0)
                             {
                                 list[i].FileName = filename.Substring(0, LeftBucketIndex) + extension;
                             }
                             break;
-                        case "*)":
+                        case GlobalConst.FUNCTYPE_BEFORERIGHTBRACKET:
                             int RightBucketIndex = filename.LastIndexOf(')') + 1;
                             if (RightBucketIndex > 0)
                             {
@@ -144,15 +144,15 @@ namespace RenameMyAss.Class
             if (!string.IsNullOrEmpty(mode) && !string.IsNullOrEmpty(UpDown) && list != null)
             {
                 UpDown = UpDown.ToLowerInvariant();
-                string filename = "", extension = "";
+                string filename = GlobalConst.EMPTY_STRING, extension = GlobalConst.EMPTY_STRING;
                 for (int i = 0; i < list.Count; i++)
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName);
                     switch (mode.ToLowerInvariant())
                     {
-                        case "all":
-                            if (UpDown == "up")
+                        case GlobalConst.FUNCTYPE_ALL:
+                            if (UpDown == GlobalConst.MOVE_UP)
                             {
                                 list[i].FileName = filename.ToUpperInvariant() + extension;
                             }
@@ -161,15 +161,15 @@ namespace RenameMyAss.Class
                                 list[i].FileName = filename.ToLowerInvariant() + extension;
                             }
                             break;
-                        case "left":
+                        case GlobalConst.FUNCTYPE_LEFT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (filename.Length < Convert.ToInt32(subparameter))
                                 {
                                     subparameter = Convert.ToString(filename.Length);
                                 }
-                                string ChangedLeftSlice = "";
-                                if (UpDown == "up")
+                                string ChangedLeftSlice = GlobalConst.EMPTY_STRING;
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     ChangedLeftSlice = filename.Substring(0, Convert.ToInt32(subparameter)).ToUpperInvariant();
                                 }
@@ -180,15 +180,15 @@ namespace RenameMyAss.Class
                                 list[i].FileName = ChangedLeftSlice + filename.Substring(Convert.ToInt32(subparameter)) + extension;
                             }
                             break;
-                        case "right":
+                        case GlobalConst.FUNCTYPE_RIGHT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (filename.Length < Convert.ToInt32(subparameter))
                                 {
                                     subparameter = Convert.ToString(filename.Length);
                                 }
-                                string ChangedRightSlice = "";
-                                if (UpDown == "up")
+                                string ChangedRightSlice = GlobalConst.EMPTY_STRING;
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     ChangedRightSlice = filename.Substring(filename.Length - Convert.ToInt32(subparameter)).ToUpperInvariant();
                                 }
@@ -199,10 +199,10 @@ namespace RenameMyAss.Class
                                 list[i].FileName = filename.Substring(0, filename.Length - Convert.ToInt32(subparameter)) + ChangedRightSlice + extension;
                             }
                             break;
-                        case "firstletter":
+                        case GlobalConst.FUNCTYPE_FIRSTLETTER:
                             if (filename.Length > 1)
                             {
-                                if (UpDown == "up")
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     list[i].FileName = char.ToUpper(filename[0]) + filename.Substring(1) + extension;
                                 }
@@ -212,10 +212,10 @@ namespace RenameMyAss.Class
                                 }
                             }
                             break;
-                        case "matchphase":
+                        case GlobalConst.FUNCTYPE_MATCHPHASE:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
-                                if (UpDown == "up")
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     list = ReplaceFileName(list, subparameter, subparameter.ToUpperInvariant());
                                 }
@@ -236,22 +236,22 @@ namespace RenameMyAss.Class
             {
                 string[] auxp = null;
                 int Digit = 0, CurrentNo = 0, Steps = 0;
-                if (mode.ToLowerInvariant() == "digit" && subparameter.Contains(";"))
+                if (mode.ToLowerInvariant() == GlobalConst.FUNCTYPE_DIGIT && subparameter.Contains(GlobalConst.AUX_CONNECTOR))
                 {
                     auxp = subparameter.Split(';'); //length, start from , step
                     Digit = Convert.ToInt32(auxp[0]); //length
                     CurrentNo = Convert.ToInt32(auxp[1]); //start from
                     Steps = Convert.ToInt32(auxp[2]); //step
                 }
-                string filename = "", extension = "", SubLeft = "", SubRight = "";
+                string filename = GlobalConst.EMPTY_STRING, extension = GlobalConst.EMPTY_STRING, SubLeft = GlobalConst.EMPTY_STRING, SubRight = GlobalConst.EMPTY_STRING;
                 for (int i = 0; i < list.Count; i++)
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName);
                     switch (mode.ToLowerInvariant())
                     {
-                        case "phase":
-                            if (position == "0")
+                        case GlobalConst.FUNCTYPE_PHASE:
+                            if (position == GlobalConst.ZERO)
                             {
                                 list = PrefixFileName(list, subparameter);
                                 return list;
@@ -268,27 +268,15 @@ namespace RenameMyAss.Class
                                 list[i].FileName = SubLeft + subparameter + SubRight + extension;
                             }
                             break;
-                        case "digit":
+                        case GlobalConst.FUNCTYPE_DIGIT:
                             string strgen = CurrentNo.ToString();
                             if (CurrentNo.ToString().Length != Digit)
                             {
                                 while (strgen.Length != Digit)
                                 {
-                                    strgen = "0" + strgen;
+                                    strgen = GlobalConst.ZERO + strgen;
                                 }
                             }
-                            //switch (CurrentNo.ToString().Length)
-                            //{
-                            //    case 1:
-                            //        strgen = "00" + CurrentNo.ToString();
-                            //        break;
-                            //    case 2:
-                            //        strgen = "0" + CurrentNo.ToString();
-                            //        break;
-                            //    case 3:
-                            //        strgen = CurrentNo.ToString();
-                            //        break;
-                            //}
                             if (Convert.ToInt32(position) > filename.Length)
                             {
                                 position = filename.Length.ToString();
@@ -314,17 +302,17 @@ namespace RenameMyAss.Class
         {
             if (!string.IsNullOrEmpty(mode) && list != null)
             {
-                string filename = "", extension = "";
+                string filename = GlobalConst.EMPTY_STRING, extension = GlobalConst.EMPTY_STRING;
                 for (int i = 0; i < list.Count; i++)
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName).Substring(1);
                     switch (mode.ToLowerInvariant())
                     {
-                        case "all":
+                        case GlobalConst.FUNCTYPE_ALL:
                             list[i].FileName = filename;
                             break;
-                        case "left":
+                        case GlobalConst.FUNCTYPE_LEFT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (extension.Length < Convert.ToInt32(subparameter))
@@ -334,7 +322,7 @@ namespace RenameMyAss.Class
                                 list[i].FileName = filename + "." + extension.Substring(0 + Convert.ToInt32(subparameter));
                             }
                             break;
-                        case "right":
+                        case GlobalConst.FUNCTYPE_RIGHT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (extension.Length < Convert.ToInt32(subparameter))
@@ -344,30 +332,30 @@ namespace RenameMyAss.Class
                                 list[i].FileName = filename + "." + extension.Substring(0, extension.Length - Convert.ToInt32(subparameter));
                             }
                             break;
-                        case "firstletter":
+                        case GlobalConst.FUNCTYPE_FIRSTLETTER:
                             if (extension.Length > 1)
                             {
                                 list[i].FileName = filename + "." + extension.Substring(1);
                             }
                             break;
-                        case "matchphase":
+                        case GlobalConst.FUNCTYPE_MATCHPHASE:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
-                                list[i].FileName = filename + "." + extension.Replace(subparameter, "");
+                                list[i].FileName = filename + "." + extension.Replace(subparameter, GlobalConst.EMPTY_STRING);
                             }
                             break;
-                        case "(*)":
+                        case GlobalConst.FUNCTYPE_BETWEENBRACKETS:
                             string regex = "(\\(.*\\))";
-                            list[i].FileName = filename + "." + Regex.Replace(extension, regex, "");
+                            list[i].FileName = filename + "." + Regex.Replace(extension, regex, GlobalConst.EMPTY_STRING);
                             break;
-                        case "(*":
+                        case GlobalConst.FUNCTYPE_FROMLEFTBRACKET:
                             int LeftBucketIndex = extension.IndexOf('(');
                             if (LeftBucketIndex > 0)
                             {
                                 list[i].FileName = filename + "." + extension.Substring(0, LeftBucketIndex);
                             }
                             break;
-                        case "*)":
+                        case GlobalConst.FUNCTYPE_BEFORERIGHTBRACKET:
                             int RightBucketIndex = extension.LastIndexOf(')') + 1;
                             if (RightBucketIndex > 0)
                             {
@@ -417,15 +405,15 @@ namespace RenameMyAss.Class
             if (!string.IsNullOrEmpty(mode) && list != null)
             {
                 UpDown = UpDown.ToLowerInvariant();
-                string filename = "", extension = "";
+                string filename = GlobalConst.EMPTY_STRING, extension = GlobalConst.EMPTY_STRING;
                 for (int i = 0; i < list.Count; i++)
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName).Substring(1);
                     switch (mode.ToLowerInvariant())
                     {
-                        case "all":
-                            if (UpDown == "up")
+                        case GlobalConst.FUNCTYPE_ALL:
+                            if (UpDown == GlobalConst.MOVE_UP)
                             {
                                 list[i].FileName = filename + "." + extension.ToUpperInvariant();
                             }
@@ -434,15 +422,15 @@ namespace RenameMyAss.Class
                                 list[i].FileName = filename + "." + extension.ToLowerInvariant();
                             }
                             break;
-                        case "left":
+                        case GlobalConst.FUNCTYPE_LEFT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (extension.Length < Convert.ToInt32(subparameter))
                                 {
                                     subparameter = Convert.ToString(extension.Length);
                                 }
-                                string ChangedLeftSlice = "";
-                                if (UpDown == "up")
+                                string ChangedLeftSlice = GlobalConst.EMPTY_STRING;
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     ChangedLeftSlice = extension.Substring(0, Convert.ToInt32(subparameter)).ToUpperInvariant();
                                 }
@@ -453,15 +441,15 @@ namespace RenameMyAss.Class
                                 list[i].FileName = filename + "." + ChangedLeftSlice + extension.Substring(Convert.ToInt32(subparameter));
                             }
                             break;
-                        case "right":
+                        case GlobalConst.FUNCTYPE_RIGHT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (extension.Length < Convert.ToInt32(subparameter))
                                 {
                                     subparameter = Convert.ToString(extension.Length);
                                 }
-                                string ChangedRightSlice = "";
-                                if (UpDown == "up")
+                                string ChangedRightSlice = GlobalConst.EMPTY_STRING;
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     ChangedRightSlice = extension.Substring(extension.Length - Convert.ToInt32(subparameter)).ToUpperInvariant();
                                 }
@@ -472,10 +460,10 @@ namespace RenameMyAss.Class
                                 list[i].FileName = filename + "." + extension.Substring(0, extension.Length - Convert.ToInt32(subparameter)) + ChangedRightSlice;
                             }
                             break;
-                        case "firstletter":
+                        case GlobalConst.FUNCTYPE_FIRSTLETTER:
                             if (extension.Length > 1)
                             {
-                                if (UpDown == "up")
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     list[i].FileName = filename + "." + char.ToUpper(extension[0]) + extension.Substring(1);
                                 }
@@ -485,10 +473,10 @@ namespace RenameMyAss.Class
                                 }
                             }
                             break;
-                        case "matchphase":
+                        case GlobalConst.FUNCTYPE_MATCHPHASE:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
-                                if (UpDown == "up")
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     list[i].FileName = filename + "." + extension.Replace(subparameter, subparameter.ToUpperInvariant());
                                 }
@@ -509,22 +497,22 @@ namespace RenameMyAss.Class
             {
                 string[] auxp = null;
                 int Digit = 0, CurrentNo = 0, Steps = 0;
-                if (mode.ToLowerInvariant() == "digit" && subparameter.Contains(";"))
+                if (mode.ToLowerInvariant() == GlobalConst.FUNCTYPE_DIGIT && subparameter.Contains(GlobalConst.AUX_CONNECTOR))
                 {
                     auxp = subparameter.Split(';'); //length, start from , step
                     Digit = Convert.ToInt32(auxp[0]); //length
                     CurrentNo = Convert.ToInt32(auxp[1]); //start from
                     Steps = Convert.ToInt32(auxp[2]); //step
                 }
-                string filename = "", extension = "", SubLeft = "", SubRight = "";
+                string filename = GlobalConst.EMPTY_STRING, extension = GlobalConst.EMPTY_STRING, SubLeft = GlobalConst.EMPTY_STRING, SubRight = GlobalConst.EMPTY_STRING;
                 for (int i = 0; i < list.Count; i++)
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName).Substring(1); ;
                     switch (mode.ToLowerInvariant())
                     {
-                        case "phase":
-                            if (position == "0")
+                        case GlobalConst.FUNCTYPE_PHASE:
+                            if (position == GlobalConst.ZERO)
                             {
                                 list = PrefixFileExtension(list, subparameter);
                                 return list;
@@ -541,13 +529,13 @@ namespace RenameMyAss.Class
                                 list[i].FileName = filename + "." + SubLeft + subparameter + SubRight;
                             }
                             break;
-                        case "digit":
+                        case GlobalConst.FUNCTYPE_DIGIT:
                             string strgen = CurrentNo.ToString(); ;
                             if (CurrentNo.ToString().Length != Digit)
                             {
                                 while (strgen.Length != Digit)
                                 {
-                                    strgen = "0" + strgen;
+                                    strgen = GlobalConst.ZERO + strgen;
                                 }
                             }
                             if (Convert.ToInt32(position) > extension.Length)
@@ -575,16 +563,16 @@ namespace RenameMyAss.Class
         {
             if (!string.IsNullOrEmpty(mode) && list != null)
             {
-                string foldername = "";
+                string foldername = GlobalConst.EMPTY_STRING;
                 for (int i = 0; i < list.Count; i++)
                 {
                     foldername = list[i].FileName;
                     switch (mode.ToLowerInvariant())
                     {
-                        case "all":
-                            list[i].FileName = "";
+                        case GlobalConst.FUNCTYPE_ALL:
+                            list[i].FileName = GlobalConst.EMPTY_STRING;
                             break;
-                        case "left":
+                        case GlobalConst.FUNCTYPE_LEFT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (foldername.Length < Convert.ToInt32(subparameter))
@@ -594,7 +582,7 @@ namespace RenameMyAss.Class
                                 list[i].FileName = foldername.Substring(0 + Convert.ToInt32(subparameter));
                             }
                             break;
-                        case "right":
+                        case GlobalConst.FUNCTYPE_RIGHT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (foldername.Length < Convert.ToInt32(subparameter))
@@ -604,7 +592,7 @@ namespace RenameMyAss.Class
                                 list[i].FileName = foldername.Substring(0, foldername.Length - Convert.ToInt32(subparameter));
                             }
                             break;
-                        case "center":
+                        case GlobalConst.FUNCTYPE_CENTER:
                             if (!string.IsNullOrEmpty(subparameter) && foldername.Length >= 3)
                             {
                                 int center = Convert.ToInt32(Math.Ceiling((Convert.ToDouble(foldername.Length) / 2))), leftlength = 0, rightlength = 0;
@@ -631,30 +619,30 @@ namespace RenameMyAss.Class
                                 list[i].FileName = foldername.Substring(0, center - leftlength - 1) + foldername.Substring(center + rightlength);
                             }
                             break;
-                        case "firstletter":
+                        case GlobalConst.FUNCTYPE_FIRSTLETTER:
                             if (foldername.Length > 1)
                             {
                                 list[i].FileName = foldername.Substring(1);
                             }
                             break;
-                        case "matchphase":
+                        case GlobalConst.FUNCTYPE_MATCHPHASE:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
-                                list = ReplaceFileName(list, subparameter, "");
+                                list = ReplaceFileName(list, subparameter, GlobalConst.EMPTY_STRING);
                             }
                             break;
-                        case "(*)":
+                        case GlobalConst.FUNCTYPE_BETWEENBRACKETS:
                             string regex = "(\\(.*\\))"; //"(\\[.*\\])|(\".*\")|('.*')|(\\(.*\\))";
-                            list[i].FileName = Regex.Replace(foldername, regex, "");
+                            list[i].FileName = Regex.Replace(foldername, regex, GlobalConst.EMPTY_STRING);
                             break;
-                        case "(*":
+                        case GlobalConst.FUNCTYPE_FROMLEFTBRACKET:
                             int LeftBucketIndex = foldername.IndexOf('(');
                             if (LeftBucketIndex > 0)
                             {
                                 list[i].FileName = foldername.Substring(0, LeftBucketIndex);
                             }
                             break;
-                        case "*)":
+                        case GlobalConst.FUNCTYPE_BEFORERIGHTBRACKET:
                             int RightBucketIndex = foldername.LastIndexOf(')') + 1;
                             if (RightBucketIndex > 0)
                             {
@@ -704,14 +692,14 @@ namespace RenameMyAss.Class
             if (!string.IsNullOrEmpty(mode) && !string.IsNullOrEmpty(UpDown) && list != null)
             {
                 UpDown = UpDown.ToLowerInvariant();
-                string foldername = "";
+                string foldername = GlobalConst.EMPTY_STRING;
                 for (int i = 0; i < list.Count; i++)
                 {
                     foldername = list[i].FileName;
                     switch (mode.ToLowerInvariant())
                     {
-                        case "all":
-                            if (UpDown == "up")
+                        case GlobalConst.FUNCTYPE_ALL:
+                            if (UpDown == GlobalConst.MOVE_UP)
                             {
                                 list[i].FileName = foldername.ToUpperInvariant();
                             }
@@ -720,15 +708,15 @@ namespace RenameMyAss.Class
                                 list[i].FileName = foldername.ToLowerInvariant();
                             }
                             break;
-                        case "left":
+                        case GlobalConst.FUNCTYPE_LEFT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (foldername.Length < Convert.ToInt32(subparameter))
                                 {
                                     subparameter = Convert.ToString(foldername.Length);
                                 }
-                                string ChangedLeftSlice = "";
-                                if (UpDown == "up")
+                                string ChangedLeftSlice = GlobalConst.EMPTY_STRING;
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     ChangedLeftSlice = foldername.Substring(0, Convert.ToInt32(subparameter)).ToUpperInvariant();
                                 }
@@ -739,15 +727,15 @@ namespace RenameMyAss.Class
                                 list[i].FileName = ChangedLeftSlice + foldername.Substring(Convert.ToInt32(subparameter));
                             }
                             break;
-                        case "right":
+                        case GlobalConst.FUNCTYPE_RIGHT:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
                                 if (foldername.Length < Convert.ToInt32(subparameter))
                                 {
                                     subparameter = Convert.ToString(foldername.Length);
                                 }
-                                string ChangedRightSlice = "";
-                                if (UpDown == "up")
+                                string ChangedRightSlice = GlobalConst.EMPTY_STRING;
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     ChangedRightSlice = foldername.Substring(foldername.Length - Convert.ToInt32(subparameter)).ToUpperInvariant();
                                 }
@@ -758,10 +746,10 @@ namespace RenameMyAss.Class
                                 list[i].FileName = foldername.Substring(0, foldername.Length - Convert.ToInt32(subparameter)) + ChangedRightSlice;
                             }
                             break;
-                        case "firstletter":
+                        case GlobalConst.FUNCTYPE_FIRSTLETTER:
                             if (foldername.Length > 1)
                             {
-                                if (UpDown == "up")
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     list[i].FileName = char.ToUpper(foldername[0]) + foldername.Substring(1);
                                 }
@@ -771,10 +759,10 @@ namespace RenameMyAss.Class
                                 }
                             }
                             break;
-                        case "matchphase":
+                        case GlobalConst.FUNCTYPE_MATCHPHASE:
                             if (!string.IsNullOrEmpty(subparameter))
                             {
-                                if (UpDown == "up")
+                                if (UpDown == GlobalConst.MOVE_UP)
                                 {
                                     list = ReplaceFolderName(list, subparameter, subparameter.ToUpperInvariant());
                                 }
@@ -795,21 +783,21 @@ namespace RenameMyAss.Class
             {
                 string[] auxp = null;
                 int Digit = 0, CurrentNo = 0, Steps = 0;
-                if (mode.ToLowerInvariant() == "digit" && subparameter.Contains(";"))
+                if (mode.ToLowerInvariant() == GlobalConst.FUNCTYPE_DIGIT && subparameter.Contains(GlobalConst.AUX_CONNECTOR))
                 {
                     auxp = subparameter.Split(';'); //length, start from , step
                     Digit = Convert.ToInt32(auxp[0]); //length
                     CurrentNo = Convert.ToInt32(auxp[1]); //start from
                     Steps = Convert.ToInt32(auxp[2]); //step
                 }
-                string foldername = "", SubLeft = "", SubRight = "";
+                string foldername = GlobalConst.EMPTY_STRING, SubLeft = GlobalConst.EMPTY_STRING, SubRight = GlobalConst.EMPTY_STRING;
                 for (int i = 0; i < list.Count; i++)
                 {
                     foldername = list[i].FileName;
                     switch (mode.ToLowerInvariant())
                     {
-                        case "phase":
-                            if (position == "0")
+                        case GlobalConst.FUNCTYPE_PHASE:
+                            if (position == GlobalConst.ZERO)
                             {
                                 list = PrefixFileName(list, subparameter);
                                 return list;
@@ -826,27 +814,15 @@ namespace RenameMyAss.Class
                                 list[i].FileName = SubLeft + subparameter + SubRight;
                             }
                             break;
-                        case "digit":
+                        case GlobalConst.FUNCTYPE_DIGIT:
                             string strgen = CurrentNo.ToString();
                             if (CurrentNo.ToString().Length != Digit)
                             {
                                 while (strgen.Length != Digit)
                                 {
-                                    strgen = "0" + strgen;
+                                    strgen = GlobalConst.ZERO + strgen;
                                 }
                             }
-                            //switch (CurrentNo.ToString().Length)
-                            //{
-                            //    case 1:
-                            //        strgen = "00" + CurrentNo.ToString();
-                            //        break;
-                            //    case 2:
-                            //        strgen = "0" + CurrentNo.ToString();
-                            //        break;
-                            //    case 3:
-                            //        strgen = CurrentNo.ToString();
-                            //        break;
-                            //}
                             if (Convert.ToInt32(position) > foldername.Length)
                             {
                                 position = foldername.Length.ToString();
