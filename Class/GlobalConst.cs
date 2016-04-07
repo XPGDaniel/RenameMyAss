@@ -1,4 +1,4 @@
-﻿namespace RenameMyAss.Class
+﻿namespace RenameToolbox.Class
 {
     public class GlobalConst
     {
@@ -36,6 +36,7 @@
         public const string MODETYPE_LOWERCASE = "lowercase";
         public const string MODETYPE_INSERT = "Insert";
         public const string MODETYPE_MAKERAR = "MakeRAR";
+        public const string MODETYPE_BMP2PNG = "BMP2PNG";
 
         public const string FUNCTYPE_ALL = "All";
         public const string FUNCTYPE_LEFT = "Left";
@@ -56,6 +57,8 @@
         public const string RESULT_UNDO_FAIL = "Undo Fail";
         public const string RESULT_RAR_OK = "RAR OK";
         public const string RESULT_RAR_FAIL = "RAR Fail";
+        public const string RESULT_PNG_OK = "PNG OK";
+        public const string RESULT_PNG_FAIL = "PNG Fail";
         public const string RESULT_INVALID_NEW_FOLDERNAME = "Invalid new FolderName";
         public const string RESULT_INVALID_NEW_FILENAME_FILEEXTENSION = "Invalid new Filename or Extension";
 

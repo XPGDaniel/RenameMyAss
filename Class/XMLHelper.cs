@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace RenameMyAss.Class
+namespace RenameToolbox.Class
 {
     public class XMLHelper
     {

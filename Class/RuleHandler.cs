@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace RenameMyAss.Class
+namespace RenameToolbox.Class
 {
     public class RuleHandler
     {

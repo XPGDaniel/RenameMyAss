@@ -1,4 +1,4 @@
-﻿namespace RenameMyAss
+﻿namespace RenameToolbox
 {
     partial class Form_Main
     {
@@ -469,7 +469,7 @@
             this.Controls.Add(this.listView_FileList);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form_Main";
-            this.Text = "Rename My Ass";
+            this.Text = "Rename Toolbox";
             this.ResumeLayout(false);
             this.PerformLayout();
 

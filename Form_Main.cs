@@ -8,16 +8,17 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using RenameMyAss.Class;
+using RenameToolbox.Class;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 
-namespace RenameMyAss
+namespace RenameToolbox
 {
     public partial class Form_Main : Form
     {
         private XMLHelper xmlH = new XMLHelper();
-        public bool MakeRAR = false;
+        public bool MakeRAR = false, BMP2PNG = false;
         private enum MoveDirection { Up = -1, Down = 1 };
         public Form_Main()
         {
@@ -53,6 +54,7 @@ namespace RenameMyAss
                     comboBox_Mode.Items.Add(GlobalConst.MODETYPE_UPPERCASE);
                     comboBox_Mode.Items.Add(GlobalConst.MODETYPE_LOWERCASE);
                     comboBox_Mode.Items.Add(GlobalConst.MODETYPE_INSERT);
+                    if (comboBox_Target.Text == GlobalConst.TARGETTYPE_FILENAME) comboBox_Mode.Items.Add(GlobalConst.MODETYPE_BMP2PNG);
                     if (comboBox_Target.Text == GlobalConst.TARGETTYPE_FOLDERNAME) comboBox_Mode.Items.Add(GlobalConst.MODETYPE_MAKERAR);
                     comboBox_Mode.Visible = true;
                     label_Mode.Visible = true;
@@ -244,6 +246,9 @@ namespace RenameMyAss
                                     case GlobalConst.MODETYPE_INSERT:
                                         newFilenameList = RuleHandler.InsertIntoFileName(newFilenameList, rule.SubItems[2].Text, rule.SubItems[3].Text, rule.SubItems[4].Text);
                                         break;
+                                    case GlobalConst.MODETYPE_BMP2PNG:
+                                        BMP2PNG = true;
+                                        break;
                                 }
                                 break;
                             case GlobalConst.TARGETTYPE_FILEEXTENSION:
@@ -390,6 +395,14 @@ namespace RenameMyAss
                                         {
                                             File.Move(fi.FullName, fi.FullName.Replace(fileCandidate.FileName, fileCandidate.NewFileName));
                                             fileCandidate.Result = GlobalConst.RESULT_RENAME_OK;
+                                            if (BMP2PNG && Path.GetExtension(fileCandidate.Path).ToLowerInvariant() == @".bmp")
+                                            {
+                                                using (Bitmap SourceBMP = new Bitmap(Directory.GetParent(fileCandidate.Path).FullName + "\\" + fileCandidate.NewFileName))
+                                                {
+                                                    SourceBMP.Save(Directory.GetParent(fileCandidate.Path).FullName + "\\" + Path.GetFileNameWithoutExtension(fileCandidate.NewFileName) + ".png", ImageFormat.Png);
+                                                    fileCandidate.Result += "-" + GlobalConst.RESULT_PNG_OK;
+                                                }
+                                            }
                                         }
                                         else
                                         {
@@ -414,7 +427,7 @@ namespace RenameMyAss
                 button_Undo.Enabled = true;
             }
             MessageBox.Show("Done!");
-            MakeRAR = false;
+            MakeRAR = false; BMP2PNG = false;
         }
         private void button_Undo_Click(object sender, EventArgs e)
         {
@@ -684,7 +697,8 @@ namespace RenameMyAss
         private void button_AddRule_Click(object sender, EventArgs e)
         {
             if ((!string.IsNullOrEmpty(comboBox_Target.Text) && !string.IsNullOrEmpty(comboBox_Mode.Text) && !string.IsNullOrEmpty(comboBox_Parameter1.Text)) ||
-            (comboBox_Target.Text == GlobalConst.TARGETTYPE_FOLDERNAME && comboBox_Mode.Text == GlobalConst.MODETYPE_MAKERAR))
+            (comboBox_Target.Text == GlobalConst.TARGETTYPE_FOLDERNAME && comboBox_Mode.Text == GlobalConst.MODETYPE_MAKERAR) ||
+            (comboBox_Target.Text == GlobalConst.TARGETTYPE_FILENAME && comboBox_Mode.Text == GlobalConst.MODETYPE_BMP2PNG))
             {
                 ListViewItem lvi = new ListViewItem();
                 lvi.Text = comboBox_Target.Text;
@@ -823,6 +837,7 @@ namespace RenameMyAss
             listView_Rules.Items.Clear();
             listView_CollectionChanged(listView_Rules, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
             MakeRAR = false;
+            BMP2PNG = false;
         }
 
         private void button_RemoveRule_Click(object sender, EventArgs e)
@@ -834,6 +849,7 @@ namespace RenameMyAss
                 foreach (ListViewItem item in listView_Rules.SelectedItems)
                 {
                     if (item.SubItems[1].Text.ToLowerInvariant() == GlobalConst.MODETYPE_MAKERAR) MakeRAR = false;
+                    if (item.SubItems[1].Text.ToLowerInvariant() == GlobalConst.MODETYPE_BMP2PNG) BMP2PNG = false;
                     listView_Rules.Items.Remove(item);
                 }
                 if (listView_Rules.Items.Count == 0)

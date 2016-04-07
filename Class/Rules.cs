@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace RenameMyAss.Class
+namespace RenameToolbox.Class
 {
     public class Rules
     {
