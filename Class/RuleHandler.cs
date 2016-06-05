@@ -19,7 +19,7 @@ namespace RenameToolbox.Class
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName);
-                    switch (mode.ToLowerInvariant())
+                    switch (mode)
                     {
                         case GlobalConst.FUNCTYPE_ALL:
                             list[i].FileName = extension;
@@ -149,7 +149,7 @@ namespace RenameToolbox.Class
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName);
-                    switch (mode.ToLowerInvariant())
+                    switch (mode)
                     {
                         case GlobalConst.FUNCTYPE_ALL:
                             if (UpDown == GlobalConst.MOVE_UP)
@@ -236,7 +236,7 @@ namespace RenameToolbox.Class
             {
                 string[] auxp = null;
                 int Digit = 0, CurrentNo = 0, Steps = 0;
-                if (mode.ToLowerInvariant() == GlobalConst.FUNCTYPE_DIGIT && subparameter.Contains(GlobalConst.AUX_CONNECTOR))
+                if (mode == GlobalConst.FUNCTYPE_DIGIT && subparameter.Contains(GlobalConst.AUX_CONNECTOR))
                 {
                     auxp = subparameter.Split(';'); //length, start from , step
                     Digit = Convert.ToInt32(auxp[0]); //length
@@ -248,7 +248,7 @@ namespace RenameToolbox.Class
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName);
-                    switch (mode.ToLowerInvariant())
+                    switch (mode)
                     {
                         case GlobalConst.FUNCTYPE_PHASE:
                             if (position == GlobalConst.ZERO)
@@ -307,7 +307,7 @@ namespace RenameToolbox.Class
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName).Substring(1);
-                    switch (mode.ToLowerInvariant())
+                    switch (mode)
                     {
                         case GlobalConst.FUNCTYPE_ALL:
                             list[i].FileName = filename;
@@ -410,7 +410,7 @@ namespace RenameToolbox.Class
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName).Substring(1);
-                    switch (mode.ToLowerInvariant())
+                    switch (mode)
                     {
                         case GlobalConst.FUNCTYPE_ALL:
                             if (UpDown == GlobalConst.MOVE_UP)
@@ -497,7 +497,7 @@ namespace RenameToolbox.Class
             {
                 string[] auxp = null;
                 int Digit = 0, CurrentNo = 0, Steps = 0;
-                if (mode.ToLowerInvariant() == GlobalConst.FUNCTYPE_DIGIT && subparameter.Contains(GlobalConst.AUX_CONNECTOR))
+                if (mode == GlobalConst.FUNCTYPE_DIGIT && subparameter.Contains(GlobalConst.AUX_CONNECTOR))
                 {
                     auxp = subparameter.Split(';'); //length, start from , step
                     Digit = Convert.ToInt32(auxp[0]); //length
@@ -509,7 +509,7 @@ namespace RenameToolbox.Class
                 {
                     filename = Path.GetFileNameWithoutExtension(list[i].FileName);
                     extension = Path.GetExtension(list[i].FileName).Substring(1); ;
-                    switch (mode.ToLowerInvariant())
+                    switch (mode)
                     {
                         case GlobalConst.FUNCTYPE_PHASE:
                             if (position == GlobalConst.ZERO)
@@ -567,7 +567,7 @@ namespace RenameToolbox.Class
                 for (int i = 0; i < list.Count; i++)
                 {
                     foldername = list[i].FileName;
-                    switch (mode.ToLowerInvariant())
+                    switch (mode)
                     {
                         case GlobalConst.FUNCTYPE_ALL:
                             list[i].FileName = GlobalConst.EMPTY_STRING;
@@ -691,12 +691,12 @@ namespace RenameToolbox.Class
         {
             if (!string.IsNullOrEmpty(mode) && !string.IsNullOrEmpty(UpDown) && list != null)
             {
-                UpDown = UpDown.ToLowerInvariant();
+                //UpDown = UpDown.ToLowerInvariant();
                 string foldername = GlobalConst.EMPTY_STRING;
                 for (int i = 0; i < list.Count; i++)
                 {
                     foldername = list[i].FileName;
-                    switch (mode.ToLowerInvariant())
+                    switch (mode)
                     {
                         case GlobalConst.FUNCTYPE_ALL:
                             if (UpDown == GlobalConst.MOVE_UP)
@@ -783,7 +783,7 @@ namespace RenameToolbox.Class
             {
                 string[] auxp = null;
                 int Digit = 0, CurrentNo = 0, Steps = 0;
-                if (mode.ToLowerInvariant() == GlobalConst.FUNCTYPE_DIGIT && subparameter.Contains(GlobalConst.AUX_CONNECTOR))
+                if (mode == GlobalConst.FUNCTYPE_DIGIT && subparameter.Contains(GlobalConst.AUX_CONNECTOR))
                 {
                     auxp = subparameter.Split(';'); //length, start from , step
                     Digit = Convert.ToInt32(auxp[0]); //length
@@ -794,7 +794,7 @@ namespace RenameToolbox.Class
                 for (int i = 0; i < list.Count; i++)
                 {
                     foldername = list[i].FileName;
-                    switch (mode.ToLowerInvariant())
+                    switch (mode)
                     {
                         case GlobalConst.FUNCTYPE_PHASE:
                             if (position == GlobalConst.ZERO)
